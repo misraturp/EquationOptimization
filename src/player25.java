@@ -5,6 +5,7 @@ import java.util.Random;
 import java.util.Properties;
 
 public class player25 implements ContestSubmission
+
 {
 	Random rnd_;
 	ContestEvaluation evaluation_;
