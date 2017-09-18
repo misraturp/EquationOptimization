@@ -16,7 +16,7 @@ public class player25 implements ContestSubmission
 	}
 	
 	public static void main(String[] args){
-		System.out.print("FUUCK");
+		System.out.print("FUCK");
 	}
 	
 	public void setSeed(long seed)
