@@ -16,7 +16,7 @@ public class player25 implements ContestSubmission
 	}
 	
 	public static void main(String[] args){
-		System.out.print("Hello to you too!");
+		System.out.print("skjfndsk");
 	}
 	
 	public void setSeed(long seed)
