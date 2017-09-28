@@ -20,12 +20,16 @@ public class player25 implements ContestSubmission
 	}
 	
 	public static void main(String[] args){
+		
+		player25 player = new player25();
+		player.run();
+		
 		System.out.print("Done!");
 	}
 	
 	public void setSeed(long seed)
 	{
-		// Set seed of algortihms random process
+		// Set seed of algorithms random process
 		rnd_.setSeed(seed);
 	}
 
@@ -496,25 +500,24 @@ public class player25 implements ContestSubmission
         
         int evals = 0;
         int size = 100;
-        int dimention = 10;
+        int dimension = 10;
         
         //Remember to always give an even number
         int parent_number = 2;
         
         // init population
-        double [][] population = initialization(size, dimention);
-        		
+        double [][] population = initialization(size, dimension);
+
+    	System.out.print("hello");
         // calculate fitness
         while(evals<evaluations_limit_){
-        	
-            // Select parents
-        	System.out.print("helo");
-        	
+        	System.out.print("im insiiidee");
+            // Select parents        	
         	//double [][] parents = selection(population, parent_number);
-        	double [][] parents = tournamentSelection(population, parent_number, 5, 0.5);
+        	double [][] parents = rankBasedSelection(population, parent_number);
 
             // Apply crossover / mutation operators
-        	double [][]children = cross_over(1,parents);
+        	double [][] children = uniform_cross_over(parents);
         		        	
             //double child[] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
         	double child[] = children[0];
@@ -522,9 +525,11 @@ public class player25 implements ContestSubmission
             Double fitness = (double) evaluation_.evaluate(child);
             evals++;
             
-            double [][] population_wChildren = Arrays.copyOf(population, size+2);
-            population_wChildren[size] = children[0];
-            population_wChildren[size+1] = children[1];
+            double [][] population_wChildren = Arrays.copyOf(population, size+children.length);
+            
+            for(int k=size;k<size+children.length;k++) {
+            	population_wChildren[k] = children[k-size];
+            }
             
             population = selection(population_wChildren, size);
             
