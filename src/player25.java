@@ -2,7 +2,9 @@ import org.vu.contest.ContestSubmission;
 import org.vu.contest.ContestEvaluation;
 
 import java.util.Random;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 public class player25 implements ContestSubmission
@@ -85,6 +87,59 @@ public class player25 implements ContestSubmission
 		return fitness_matrix;
 	}
 	
+	public double [][] fitnessSort(double [] fitness_array, double [][] population){
+		
+		int size = population.length;
+		int dim =  population[0].length;
+		double [][] sorted_population = new double[size][dim];
+		double [] sorted_fitness_array = new double[size];
+		
+		int count = 0;
+		double curr = 0;
+		double temp_max = 0;
+		int index = 0;
+		
+		//while the number of high fitness valued individuals we found 
+		//is less than the wanted num of parents
+		while(count<=size) {
+			//get the fitness value of first individual
+			temp_max = fitness_array[0];
+			
+			//iterate through whole list
+			for(int j=0;j<size; j++) {
+				
+				//get next individual to compare (starting with the first one)
+				curr = fitness_array[j];
+				
+				//if the new found fitness value is more than the one we have
+				if(temp_max<curr) {
+					//update max value
+					temp_max = curr;
+					
+					//update max value found index
+					index = j;
+				}
+			}
+			
+			//after iteration is done, set the fitness value of found highest to really low
+			//so it won't be selected again
+			fitness_array[index] = -100;
+			
+			//put the new max to array
+			sorted_population[count] = population[index];
+			sorted_fitness_array[count] = fitness_array[index];
+			
+			//update necessary variables
+			count++;
+			curr = 0;
+			temp_max = 0;
+			index = 0;
+		}
+		
+		
+		return sorted_population;
+	}
+	
 	
 	//SELECTION ALGORITHMS//
 	
@@ -164,76 +219,85 @@ public class player25 implements ContestSubmission
 		//get the fitness of selected individuals
 		double [] fitness_array = getFitnessArray(tributes);
 		
-		//sorting based on fitness values**********************************************//
-		double[][] sorted_tributes = new double[tournament_num][dim];
-		double [] sorted_fitness_array = new double[tournament_num];
-		
-		int count = 0;
-		double curr = 0;
-		double temp_max = 0;
-		int index = 0;
-		
-		//while the number of high fitness valued individuals we found 
-		//is less than the wanted num of parents
-		while(count<=tournament_num) {
-			//get the fitness value of first individual
-			temp_max = fitness_array[0];
-			
-			//iterate through whole list
-			for(int j=0;j<size; j++) {
-				
-				//get next individual to compare (starting with the first one)
-				curr = fitness_array[j];
-				
-				//if the new found fitness value is more than the one we have
-				if(temp_max<curr) {
-					//update max value
-					temp_max = curr;
-					
-					//update max value found index
-					index = j;
-				}
-			}
-			
-			//after iteration is done, set the fitness value of found highest to really low
-			//so it won't be selected again
-			fitness_array[index] = -100;
-			
-			//put the new max to array
-			sorted_tributes[count] = population[index];
-			sorted_fitness_array[count] = fitness_array[index];
-			
-			//update necessary variables
-			count++;
-			curr = 0;
-			temp_max = 0;
-			index = 0;
-		}
+		double[][] sorted_tributes = fitnessSort(fitness_array, tributes);
+//		//sorting based on fitness values**********************************************//
+//		double[][] sorted_tributes = new double[tournament_num][dim];
+//		double [] sorted_fitness_array = new double[tournament_num];
+//		
+//		int count = 0;
+//		double curr = 0;
+//		double temp_max = 0;
+//		int index = 0;
+//		
+//		//while the number of high fitness valued individuals we found 
+//		//is less than the wanted num of parents
+//		while(count<=tournament_num) {
+//			//get the fitness value of first individual
+//			temp_max = fitness_array[0];
+//			
+//			//iterate through whole list
+//			for(int j=0;j<size; j++) {
+//				
+//				//get next individual to compare (starting with the first one)
+//				curr = fitness_array[j];
+//				
+//				//if the new found fitness value is more than the one we have
+//				if(temp_max<curr) {
+//					//update max value
+//					temp_max = curr;
+//					
+//					//update max value found index
+//					index = j;
+//				}
+//			}
+//			
+//			//after iteration is done, set the fitness value of found highest to really low
+//			//so it won't be selected again
+//			fitness_array[index] = -100;
+//			
+//			//put the new max to array
+//			sorted_tributes[count] = population[index];
+//			sorted_fitness_array[count] = fitness_array[index];
+//			
+//			//update necessary variables
+//			count++;
+//			curr = 0;
+//			temp_max = 0;
+//			index = 0;
+//		}
 		//**************************************************************************//
 		
-		int [] probabilities = new int[tournament_num];
-		int prob = 0;
-		int total = 0;
+		double [] probabilities = new double[tournament_num];
+		double prob = 0;
+		double total = 0;
 		
 		//assign probabilities
 		for(int k = 0; k<tournament_num; k++) {
-			prob = (int) (probability*Math.pow((1-probability),k))*100;
+			prob = (probability*Math.pow((1-probability),k));
 			probabilities[k] = prob;
 			total = total + prob;
 		}
 		
+		
+		List<Integer> used = new ArrayList<Integer>();
+		int t=0;
+
 		//for each new parent
-		for(int t=0; t<parent_num;t++) {
+		while(t<parent_num) {
 			
 			//generate random number from 0 to total(sum of all probs)
-			int generated = rand.nextInt(total);
+			double generated = total * rand.nextDouble();
 			
-			int c = 0;
+			double c = 0;
 			for(int p=0; p<tournament_num;p++){
+				
 				c = c + probabilities[p];
-				if(generated<c) {
-					//I MIGHT END UP SELECTING THE 2 OF THE SAME PARENT HERE
-					parents[t] = sorted_tributes[p];				
+				
+				if(generated<c && !used.contains(t)) {
+					
+					parents[t] = sorted_tributes[p];	
+					used.add(t);
+					t++;
 				}
 			}
 		}
@@ -261,27 +325,90 @@ public class player25 implements ContestSubmission
 		return parents;
 	}
 	
-	public double[][] uniformSelection(double [][] population) {
+	public double[][] uniformSelection(double [][] population, int parent_num) {
 
+		Random rand = new Random();
+		
 		int size = population.length;
 		int dim = population[0].length;
 		
 		double [][] parents = new double[size][dim];
+
+		List<Integer> used = new ArrayList<Integer>();
+		int index = 0;
+		int i=0;
+		
+		while(i<parent_num) {
+			index = rand.nextInt(size);
+			
+			if(!used.contains(index)) {
+				parents[i] = population[index];
+				used.add(index);
+				i++;
+			}
+		}
 		
 		return parents;
 	}
 	
-	public double[][] rankBasedSelection(double [][] population) {
+	public double[][] rankBasedSelection(double [][] population, int parent_num) {
 
+		Random rand = new Random();
+		
 		int size = population.length;
 		int dim = population[0].length;
 		
 		double [][] parents = new double[size][dim];
+		
+		double [] fitness_array = getFitnessArray(population);		
+		double [][] sorted_population = fitnessSort(fitness_array, population);
+		
+		double [] probabilities = new double[size];
+		double prob = 0;
+		double total = 0;
+		
+		//assign probabilities
+		for(int k = 0; k<size; k++) {
+			prob = (1/(k+2));
+			probabilities[k] = prob;
+			total = total + prob;
+		}
+		
+		List<Integer> used = new ArrayList<Integer>();
+		int t=0;
+
+		//for each new parent
+		while(t<parent_num) {
+			
+			//generate random number from 0 to total(sum of all probs)
+			double generated = total * rand.nextDouble();
+			
+			double c = 0;
+			
+			//iterates over whole population until finds to which individual the
+			//generated number refers
+			for(int p=0; p<size;p++){
+				
+				c = c + probabilities[p];
+				
+				if(generated<c && !used.contains(t)) {
+					
+					parents[t] = sorted_population[p];	
+					used.add(t);
+					t++;
+				}
+			}
+		}
 		
 		return parents;
 	}
 	
 	//END SELECTION ALGORITHMS//
+	
+	//SURVIVOR SEL. ALGORITHMS*****************************************//
+	
+	
+	//END SURVIVOR SEL. ALGORITHMS*******************************************//
 	
 	public double[][] cross_over(int point_num, double[][] parents)
 	{
@@ -304,13 +431,27 @@ public class player25 implements ContestSubmission
 		return children;
 	}
     
+	public double[][] uniform_cross_over(double[][] parents){
+		
+		int size = parents.length;
+		double[][] children = new double [size][];
+		
+		//randomly assign parents together
+		
+		//randomly 
+		
+		return children;
+	}
+	
 	public void run()
 	{
 		// Run your algorithm here
         
         int evals = 0;
-        int size = 10;
+        int size = 100;
         int dimention = 10;
+        
+        //Remember to always give an even number
         int parent_number = 2;
         
         // init population
@@ -318,13 +459,15 @@ public class player25 implements ContestSubmission
         		
         // calculate fitness
         while(evals<evaluations_limit_){
+        	
             // Select parents
         	System.out.print("helo");
+        	
         	//double [][] parents = selection(population, parent_number);
         	double [][] parents = tournamentSelection(population, parent_number, 5, 0.5);
-        	
-        	double [][]children = cross_over(1,parents);
+
             // Apply crossover / mutation operators
+        	double [][]children = cross_over(1,parents);
         		        	
             //double child[] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
         	double child[] = children[0];
