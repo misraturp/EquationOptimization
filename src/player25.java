@@ -433,12 +433,59 @@ public class player25 implements ContestSubmission
     
 	public double[][] uniform_cross_over(double[][] parents){
 		
+		Random rand = new Random();
+
 		int size = parents.length;
-		double[][] children = new double [size][];
+		int dim = parents[0].length;
+		double[][] children = new double [size][dim];
+
+		List<Integer> used = new ArrayList<Integer>();
+		int num1 = 0;
+		int num2 = 0;
+		int count = 0;
+		int child_index = 0;
+		
+		double[]parent1 = new double[dim];
+		double[]parent2 = new double[dim];
 		
 		//randomly assign parents together
+		while(used.size()<size) {
+			
+			//select the first parent
+			while(count == 0) {
+				num1 = rand.nextInt(size); 
+				if(!used.contains(num1)) {
+					parent1 = parents[num1];
+					count++;
+				}
+			}
+			count = 0;
+			used.add(num1);
+			
+			//select the second parent
+			while(count == 0) {
+				num2 = rand.nextInt(size);
+				if(!used.contains(num2)){
+					parent2 = parents[num2];
+					count++;
+				}
+			}
+			count = 0;
+			used.add(num2);
+			
+			for(int j=0; j<dim; j++) {
+				if(Math.random()<0.5) {
+					children[child_index][j] = parent1[j];
+					children[child_index+1][j] = parent2[j];
+				}
+				else {
+					children[child_index][j] = parent2[j];
+					children[child_index+1][j] = parent1[j];
+				}
+			}
+			child_index = child_index + 2;
+		}
 		
-		//randomly 
 		
 		return children;
 	}
