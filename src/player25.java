@@ -13,6 +13,7 @@ public class player25 implements ContestSubmission
 	Random rnd_;
 	ContestEvaluation evaluation_;
     private int evaluations_limit_;
+    public int evals;
 	
 	public player25()
 	{
@@ -21,9 +22,14 @@ public class player25 implements ContestSubmission
 	
 	public static void main(String[] args){
 		
-		player25 player = new player25();
-		player.run();
+		//ContestEvaluation con = System.getProperty("evaluation");
 		
+		BentCigarFunction eval = new BentCigarFunction();
+		
+		player25 player = new player25();
+		player.setSeed(1);
+		player.setEvaluation(eval);
+		player.run();
 		System.out.print("Done!");
 	}
 	
@@ -31,6 +37,10 @@ public class player25 implements ContestSubmission
 	{
 		// Set seed of algorithms random process
 		rnd_.setSeed(seed);
+	}
+	
+	public void setLimit(int limit) {
+		evaluations_limit_ = limit;
 	}
 
 	public void setEvaluation(ContestEvaluation evaluation)
@@ -76,7 +86,7 @@ public class player25 implements ContestSubmission
 	}
 	
 	public double[] getFitnessArray(double [][] individuals) {
-
+		
 		int size = individuals.length;
 		int dim =  individuals[0].length;
 		double [] fitness_matrix = new double [size];
@@ -86,6 +96,7 @@ public class player25 implements ContestSubmission
 		for(int i=0;i<size; i++) {
 				indv = individuals[i];
 				fitness_matrix[i] = (double) evaluation_.evaluate(indv);
+				evals++;
 		}
 		
 		return fitness_matrix;
@@ -105,7 +116,7 @@ public class player25 implements ContestSubmission
 		
 		//while the number of high fitness valued individuals we found 
 		//is less than the wanted num of parents
-		while(count<=size) {
+		while(count<size) {
 			//get the fitness value of first individual
 			temp_max = fitness_array[0];
 			
@@ -127,11 +138,11 @@ public class player25 implements ContestSubmission
 			
 			//after iteration is done, set the fitness value of found highest to really low
 			//so it won't be selected again
+			sorted_fitness_array[count] = fitness_array[index];
 			fitness_array[index] = -100;
 			
 			//put the new max to array
 			sorted_population[count] = population[index];
-			sorted_fitness_array[count] = fitness_array[index];
 			
 			//update necessary variables
 			count++;
@@ -152,8 +163,8 @@ public class player25 implements ContestSubmission
 	{
 		int size = population.length;
 		int dim =  population[0].length;
-		double[] child = new double[dim];
-		double [][] parents = new double[size][parent_num];
+
+		double [][] parents = new double[parent_num][dim];
 		
 		//calculate fitness of population
 		double [] fitness_matrix = getFitnessArray(population);
@@ -166,7 +177,7 @@ public class player25 implements ContestSubmission
 		
 		//while the number of high fitness valued individuals we found 
 		//is less than the wanted num of parents
-		while(count<=parent_num) {
+		while(count<parent_num) {
 			//get the fitness value of first individual
 			temp_max = fitness_matrix[0];
 			
@@ -362,7 +373,7 @@ public class player25 implements ContestSubmission
 		int size = population.length;
 		int dim = population[0].length;
 		
-		double [][] parents = new double[size][dim];
+		double [][] parents = new double[parent_num][dim];
 		
 		double [] fitness_array = getFitnessArray(population);		
 		double [][] sorted_population = fitnessSort(fitness_array, population);
@@ -373,7 +384,7 @@ public class player25 implements ContestSubmission
 		
 		//assign probabilities
 		for(int k = 0; k<size; k++) {
-			prob = (1/(k+2));
+			prob = (1.0/(k+2.0));
 			probabilities[k] = prob;
 			total = total + prob;
 		}
@@ -398,8 +409,9 @@ public class player25 implements ContestSubmission
 				if(generated<c && !used.contains(t)) {
 					
 					parents[t] = sorted_population[p];	
-					used.add(t);
+					used.add(p);
 					t++;
+					break;
 				}
 			}
 		}
@@ -498,7 +510,7 @@ public class player25 implements ContestSubmission
 	{
 		// Run your algorithm here
         
-        int evals = 0;
+        evals = 0;
         int size = 100;
         int dimension = 10;
         
@@ -522,12 +534,13 @@ public class player25 implements ContestSubmission
             //double child[] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
         	double child[] = children[0];
             // Check fitness of unknown function
-            Double fitness = (double) evaluation_.evaluate(child);
-            evals++;
+            //Double fitness = (double) evaluation_.evaluate(child);
+            //evals++;
             
             double [][] population_wChildren = Arrays.copyOf(population, size+children.length);
             
             for(int k=size;k<size+children.length;k++) {
+            	
             	population_wChildren[k] = children[k-size];
             }
             
