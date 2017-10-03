@@ -187,7 +187,6 @@ public class player25 implements ContestSubmission
 			
 			//iterate through whole list
 			for(int j=0;j<size; j++) {
-				
 				//NULL POINTER BECAUSE WE DO NOT HAVE THE CHILDREN'S FITNESS VALUES HERE************//
 				//get next individual to compare (starting with the first one)
 				curr = fitness_m[j];
@@ -451,7 +450,7 @@ public class player25 implements ContestSubmission
 	public double[][] cross_over(int point_num, double[][] parents)
 	{
 		int dim =  parents[0].length;
-		double[][] children = new double[2][dim];
+		double[][] children = new double[parents.length][dim];
 		
 		int cross_point = dim/2;
 		
@@ -543,13 +542,13 @@ public class player25 implements ContestSubmission
 		// Run your algorithm here
         
         evals = 0;
-        int size = 100;
+        int size = 50;
         int dimension = 10;
         double max_fitness = 0;
         double best_fitness = 0;
         
         //Remember to always give an even number
-        int parent_number = 6;
+        int parent_number = 2;
         
         // init population
         double [][] population = initialization(size, dimension);
@@ -558,15 +557,15 @@ public class player25 implements ContestSubmission
     	System.out.println("Starting...");
         // calculate fitness
         while(evals<evaluations_limit_){
-        	//system.outprintln("evals:" + evals);
+        	System.out.println("evals:" + evals);
             // Select parents        	
         	//double [][] parents = selection(population, parent_number);
         	double [][] parents = rankBasedSelection(population, parent_number);
-        	//system.outprintln("parents chosen");
+        	//System.out.println("parents chosen");
         	
             // Apply crossover / mutation operators
         	double [][] children = uniform_cross_over(parents);
-        	//system.outprintln("children created");
+        	//System.out.println("children created");
         		        	
             //double child[] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
         	double child[] = children[0];
@@ -582,11 +581,15 @@ public class player25 implements ContestSubmission
             }
 
     		double[] fitness_old = Arrays.copyOf(fitness_array, population_wChildren.length);
+
     		for(int j=fitness_array.length;j<fitness_old.length;j++) {
-    			fitness_old[j]=(double) evaluation_.evaluate(population_wChildren[j]);
-    			evals++;
+    			if(evals<evaluations_limit_) {
+	    			double ev = (double) evaluation_.evaluate(population_wChildren[j]);
+	    			fitness_old[j]= ev;
+	    			evals++;
+    			}
     		}
-    		
+
             population = selection(population_wChildren, size, fitness_old, true);
         	//System.out.println("new population created");
 
