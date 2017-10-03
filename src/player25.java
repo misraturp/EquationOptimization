@@ -161,14 +161,13 @@ public class player25 implements ContestSubmission
 	//SELECTION ALGORITHMS//
 	
 	//returns best n individuals
-	public double[][] selection(double [][] population, int parent_num, boolean merge) 
+	public double[][] selection(double [][] population, int parent_num, double[] fitness_m, boolean merge) 
 	{
 		int size = population.length;
 		int dim =  population[0].length;
 
 		double [][] parents = new double[parent_num][dim];
-		double[] fitness_old = Arrays.copyOf(fitness_array, fitness_array.length);
-		double[] fitness_new = new double[size];
+		double[] fitness_new = new double[fitness_array.length];
 		
 		//calculate fitness of population
 		//double [] fitness_matrix = getFitnessArray(population);
@@ -184,14 +183,14 @@ public class player25 implements ContestSubmission
 		//is less than the wanted num of parents
 		while(count<parent_num) {
 			//get the fitness value of first individual
-			temp_max = fitness_old[0];
+			temp_max = fitness_m[0];
 			
 			//iterate through whole list
 			for(int j=0;j<size; j++) {
 				
 				//NULL POINTER BECAUSE WE DO NOT HAVE THE CHILDREN'S FITNESS VALUES HERE************//
 				//get next individual to compare (starting with the first one)
-				curr = fitness_old[j];
+				curr = fitness_m[j];
 				
 				//if the new found fitness value is more than the one we have
 				if(temp_max<curr) {
@@ -204,11 +203,11 @@ public class player25 implements ContestSubmission
 			}
 			
 			//this is only relevant if done after merging children and population
-			fitness_new[count] = fitness_old[index];
+			fitness_new[count] = fitness_m[index];
 			
 			//after iteration is done, set the fitness value of found highest to really low
 			//so it won't be selected again
-			fitness_old[index] = -100;
+			fitness_m[index] = -100;
 			
 			//put the new parent to array
 			parents[count] = population[index];
@@ -409,6 +408,7 @@ public class player25 implements ContestSubmission
 		List<Integer> used = new ArrayList<Integer>();
 		int t=0;
 
+		//system.outprintln("probs assigned, starting parent selection...");
 		//for each new parent
 		while(t<parent_num) {
 			
@@ -423,12 +423,17 @@ public class player25 implements ContestSubmission
 				
 				c = c + probabilities[p];
 				
-				if(generated<c && !used.contains(t)) {
-					
-					parents[t] = sorted_population[p];	
-					used.add(p);
-					t++;
-					break;
+				if(generated<c) {
+					if(!used.contains(p)) {
+						//system.outprintln("parent selected");
+						parents[t] = sorted_population[p];	
+						used.add(p);
+						t++;
+						break;
+					}
+					else {
+						break;
+					}
 				}
 			}
 		}
@@ -544,22 +549,24 @@ public class player25 implements ContestSubmission
         double best_fitness = 0;
         
         //Remember to always give an even number
-        int parent_number = 2;
+        int parent_number = 6;
         
         // init population
         double [][] population = initialization(size, dimension);
 		fitness_array = getFitnessArray(population);
 
-    	System.out.println("hello");
+    	System.out.println("Starting...");
         // calculate fitness
         while(evals<evaluations_limit_){
-        	System.out.println("evals:" + evals);
+        	//system.outprintln("evals:" + evals);
             // Select parents        	
         	//double [][] parents = selection(population, parent_number);
         	double [][] parents = rankBasedSelection(population, parent_number);
-
+        	//system.outprintln("parents chosen");
+        	
             // Apply crossover / mutation operators
         	double [][] children = uniform_cross_over(parents);
+        	//system.outprintln("children created");
         		        	
             //double child[] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
         	double child[] = children[0];
@@ -573,17 +580,28 @@ public class player25 implements ContestSubmission
             	
             	population_wChildren[k] = children[k-size];
             }
-            
-            population = selection(population_wChildren, size, true);
 
+    		double[] fitness_old = Arrays.copyOf(fitness_array, population_wChildren.length);
+    		for(int j=fitness_array.length;j<fitness_old.length;j++) {
+    			fitness_old[j]=(double) evaluation_.evaluate(population_wChildren[j]);
+    			evals++;
+    		}
+    		
+            population = selection(population_wChildren, size, fitness_old, true);
+        	//System.out.println("new population created");
+
+            
             best_fitness = getMaxValue(fitness_array);
             if(max_fitness<best_fitness) {
             	max_fitness = best_fitness;
             }
-            
+
+        	//System.out.print(".");
+        	
             // Select survivors
             	//log fitness values with stats****///
         }
-        System.out.println(max_fitness);        
+        
+        System.out.println("Best fitness: " + max_fitness);        
 	}
 }
