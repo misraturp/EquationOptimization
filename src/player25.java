@@ -537,6 +537,25 @@ public class player25 implements ContestSubmission
 	    return maxValue;
 	}
 	
+	public double[][] mutation(double[][] individuals){
+		
+		for(int i=0; i<individuals.length; i++) {
+			if(Math.random()>0.90) {
+				for(int j=0; j<individuals[0].length;j++) {
+					if(Math.random()>0.7 && individuals[i][j]>-5 && individuals[i][j]<4.7){
+						if(Math.random()<0.5) {
+							individuals[i][j]--;
+						}else {
+							individuals[i][j]++;
+						}
+					}
+				}
+			}
+		}
+		
+		return individuals;
+	}
+	
 	public void run()
 	{
 		// Run your algorithm here
@@ -557,15 +576,16 @@ public class player25 implements ContestSubmission
     	System.out.println("Starting...");
         // calculate fitness
         while(evals<evaluations_limit_){
-        	System.out.println("evals:" + evals);
+        	//System.out.println("evals:" + evals);
             // Select parents        	
         	//double [][] parents = selection(population, parent_number);
         	double [][] parents = rankBasedSelection(population, parent_number);
         	//System.out.println("parents chosen");
         	
             // Apply crossover / mutation operators
-        	double [][] children = uniform_cross_over(parents);
+        	double [][] children = cross_over(2,parents);
         	//System.out.println("children created");
+        	children = mutation(children);
         		        	
             //double child[] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
         	double child[] = children[0];
