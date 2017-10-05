@@ -270,8 +270,6 @@ public class player25 implements ContestSubmission
 				tributes[count] = original_population[ind];
 				used_1.add(ind);
 				count++;
-				//POSSIBLE PASS BY REFERENCE ERROR//**************************//
-				//tributes_fitness[i] = fitness_array[ind];
 			}
 		}
 		
@@ -293,28 +291,6 @@ public class player25 implements ContestSubmission
 		
 		parents = selectBasedOnProbability(tributes, parent_num, total);
 		
-		/*List<Integer> used = new ArrayList<Integer>();
-		int t=0;
-
-		//for each new parent
-		while(t<parent_num) {
-			
-			//generate random number from 0 to total(sum of all probs)
-			double generated = total * rand.nextDouble();
-			
-			double c = 0;
-			for(int p=0; p<tournament_num;p++){
-				
-				c = c + tributes[p].probability;
-				
-				if(generated<c && !used.contains(p)) {
-					
-					parents[t] = sorted_tributes[p];	
-					used.add(t);
-					t++;
-				}
-			}
-		}*/
 		
 		return parents;
 	}
@@ -448,6 +424,9 @@ public class player25 implements ContestSubmission
 	//END SELECTION ALGORITHMS//
 	
 	//STILL ASSUMES 2 CHILDREN
+	
+	//CROSS-OVER ALGORITHMS//
+	
 	public individual[] cross_over(individual[] parents, int point_num)
 	{
 		int dim =  parents[0].dim;
@@ -535,6 +514,8 @@ public class player25 implements ContestSubmission
 		return children;
 	}
 	
+	//END CROSS-OVER ALGORITHMS//
+	
 	//DONE
 	public double getMaxValue(double[] array) {
 	    double maxValue = 0;
@@ -579,17 +560,22 @@ public class player25 implements ContestSubmission
 		return selected;
 	}
 	
+	//MUTATION ALGORITHMS//
+	
 	//DONE
 	public individual[] mutation(individual[] children){
+
 		
 		for(int i=0; i<children.length; i++) {
 			if(Math.random()>0.6) {
 				for(int j=0; j<children[0].dim;j++) {
-					if(Math.random()>0.8 && children[i].content[j]>-4 && children[i].content[j]<4){
+					if(Math.random()>0.8 && children[i].content[j]>-4.6 && children[i].content[j]<4.6){
 						if(Math.random()<0.5) {
-							children[i].content[j]--;
+							//children[i].content[j]--;
+							children[i].content[j] = children[i].content[j] - 0.4;
 						}else {
-							children[i].content[j]++;
+							//children[i].content[j]++;
+							children[i].content[j] = children[i].content[j] + 0.4;
 						}
 					}
 				}
@@ -604,6 +590,40 @@ public class player25 implements ContestSubmission
 		
 		return children;
 	}
+	
+
+	
+	public individual[] gaussian_mutation(individual[] children){
+		
+		Random rand = new Random();
+		double gaussian = 0.0;
+		
+		for(int i=0;i<children.length;i++) {
+			for(int j=0;j<children[0].dim;j++) {
+				gaussian = rand.nextGaussian()*0.01; 
+				if(children[i].content[j]+gaussian>5)
+				{
+					children[i].content[j] = 5;
+				}
+				else if(children[i].content[j]+gaussian<-5)
+				{
+					children[i].content[j] = -5;					
+				}else {
+					children[i].content[j] = children[i].content[j]+gaussian; 
+				}
+			}
+		}
+		
+		for(int a=0; a<children.length;a++) {
+			children[a].fitness_value = (double) evaluation_.evaluate(children[a].content);
+			children[a].comp_fit=children[a].fitness_value;
+			evals++;
+		}
+		
+		return children;
+	}
+	
+	//END MUTATION ALGORITHMS
 	
 	//SURVIVOR SELECTION ALGORITHMS//
 	
@@ -622,7 +642,7 @@ public class player25 implements ContestSubmission
 	}
 	
 	//DONE
-	public individual[] elitizm(individual[] pop_wChildren, int best_n){
+	public individual[] elitism(individual[] pop_wChildren, int best_n){
 		
 		Random rn = new Random();
 
@@ -649,6 +669,7 @@ public class player25 implements ContestSubmission
 		pop_wChildren = fitnessSort(pop_wChildren);
 
 		List<Integer> used = new ArrayList<Integer>();
+		boolean skipped = true;
 		
         for(int j=0;j<best_n;j++) {
         	new_generation[j] = pop_wChildren[j];
@@ -657,13 +678,19 @@ public class player25 implements ContestSubmission
         
         int index = 0;
         for(int k=best_n;k<size;k++){
-        	index = rn.nextInt((size - best_n) + 1) + best_n;
-        	if(!used.contains(index)) {
-        		new_generation[k] = original_population[index];
+        	
+        	while(skipped) {
+	        	index = rn.nextInt((size-1 - best_n) + 1) + best_n;
+	        	
+	        	if(!used.contains(index)) {
+	        		new_generation[k] = original_population[index];
+	        		used.add(index);
+	        		skipped = false;
+	        	}
         	}
+        	skipped = true;
         }
         
-		
 		return new_generation;
 	}
 	
@@ -718,20 +745,22 @@ public class player25 implements ContestSubmission
 				used.add(i);
 				
 				//populate competitor list
-				for(int k=1;k<=competitor_num;k++) {
+				for(int k=1;k<competitor_num;k++) {
 					int index = rand.nextInt(pop_wChildren.length);
 					if(!used.contains(index)) {
 						competitors[k] = pop_wChildren[index];
 						used.add(index);
 					}
 				}
+				
+				//BURASI YANLIS OLMUS BURAYI SAAPALIM//
 			
 				//FIGHT!
-				individual[] sorted = fitnessSort(competitors);
+				competitors = fitnessSort(competitors);
 
 				//distribute the win values
 				for(int el=0; el<competitors.length;el++){
-					sorted[el].wins=sorted.length-el-1;
+					competitors[el].wins=competitors[el].wins+competitors.length-el-1;
 				}
 			
 			}
@@ -759,7 +788,7 @@ public class player25 implements ContestSubmission
 	public void run()
 	{
 		// Run your algorithm here
-		int iterations = evaluations_limit_/1000;
+		int iterations = evaluations_limit_/10000;
 		for(int trial=0;trial<iterations;trial++) {
 			
 	        evals = 0;
@@ -780,24 +809,20 @@ public class player25 implements ContestSubmission
 	
 	    	//System.out.println("Starting...");
 	        // calculate fitness
-	        while(evals<1000){
+	        while(evals<10000){
 	//        	/evaluations_limit_
 	        	//System.out.println("evals:" + evals);
 	            // Select parents        	
 	        	//double [][] parents = selection(population, parent_number);
-	        	individual[] parents = rankBasedSelection(parent_number);
+	        	//individual[] parents = rankBasedSelection(parent_number);
+	        	individual[] parents = tournamentSelection(parent_number, 50, 0.3);
 	        	//System.out.println("parents chosen");
 	        	
 	            // Apply crossover / mutation operators
 	        	individual[] children = uniform_cross_over(parents);
 	        	//System.out.println("children created");
-	        	children = mutation(children);
-	        		        	
-	            //double child[] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-	        	//individual child = children[0];
-	            // Check fitness of unknown function
-	            //Double fitness = (double) evaluation_.evaluate(child);
-	            //evals++;
+	        	children = gaussian_mutation(children);
+	        		     
 	            
 	            individual[] population_wChildren = Arrays.copyOf(original_population, size+children.length);
 	            
@@ -806,21 +831,11 @@ public class player25 implements ContestSubmission
 	            	population_wChildren[k] = children[k-size];
 	            }
 	
-	            /*outdated start*/
-	    		//double[] fitness_old = Arrays.copyOf(fitness_array, population_wChildren.length);
-	
-	            //add fitness values of children
-	    		//for(int j=fitness_array.length;j<fitness_old.length;j++) {
-	    		//	if(evals<evaluations_limit_) {
-		    	//		double ev = (double) evaluation_.evaluate(population_wChildren[j]);
-		    	//		fitness_old[j]= ev;
-		    	//		evals++;
-	    		//	}
-	    		//}
-	            /*outdated end*/
 	
 	    		//genitor selection
 	            original_population = selection(population_wChildren, size);
+	            //original_population = elitism(population_wChildren, 5);
+	            //original_population = round_robin(population_wChildren, 3, 5);
 	        	//System.out.println("new population created");
 	
 	            fitness_array = populateFitnessArray();
@@ -828,6 +843,7 @@ public class player25 implements ContestSubmission
 	            if(max_fitness<best_fitness) {
 	            	max_fitness = best_fitness;
 	            	optimum_eval=evals;
+	            	//System.out.println(optimum_eval);
 	            }
 	
 	        	//System.out.print(".");
