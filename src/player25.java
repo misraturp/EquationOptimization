@@ -31,10 +31,20 @@ public class player25 implements ContestSubmission
 		BentCigarFunction eval = new BentCigarFunction();
 
 		player25 player = new player25();
-			player.setSeed(1);
-			player.setEvaluation(eval);
-			player.run();
-			//System.out.println("Done!");
+		player.setSeed(1);
+		player.setEvaluation(eval);
+		player.run();
+		
+			
+		//SchaffersEvaluation eval_sch = new SchaffersEvaluation();
+		
+		//player25 player_sch = new player25();
+		//player_sch.setSeed(1);
+		//player_sch.setEvaluation(eval_sch);
+		//player_sch.run();
+		
+		System.out.println("Done!");
+			
 	}
 	
 	public void setSeed(long seed)
@@ -65,6 +75,12 @@ public class player25 implements ContestSubmission
 		// Do sth with property values, e.g. specify relevant settings of your algorithm
         if(isMultimodal){
             // Do sth
+        	if(isSeparable) {
+
+        	}
+        	else {
+        		
+        	}
         }else{
             // Do sth else
         }
@@ -599,8 +615,11 @@ public class player25 implements ContestSubmission
 		double gaussian = 0.0;
 		
 		for(int i=0;i<children.length;i++) {
+			
 			for(int j=0;j<children[0].dim;j++) {
+				
 				gaussian = rand.nextGaussian()*0.01; 
+				
 				if(children[i].content[j]+gaussian>5)
 				{
 					children[i].content[j] = 5;
@@ -608,7 +627,8 @@ public class player25 implements ContestSubmission
 				else if(children[i].content[j]+gaussian<-5)
 				{
 					children[i].content[j] = -5;					
-				}else {
+				}
+				else {
 					children[i].content[j] = children[i].content[j]+gaussian; 
 				}
 			}
@@ -788,8 +808,8 @@ public class player25 implements ContestSubmission
 	public void run()
 	{
 		// Run your algorithm here
-		int iterations = evaluations_limit_/10000;
-		for(int trial=0;trial<iterations;trial++) {
+		//int iterations = evaluations_limit_/10000;
+		//for(int trial=0;trial<iterations;trial++) {
 			
 	        evals = 0;
 	        int size = 50;
@@ -809,7 +829,7 @@ public class player25 implements ContestSubmission
 	
 	    	//System.out.println("Starting...");
 	        // calculate fitness
-	        while(evals<10000){
+	        while(evals<evaluations_limit_){
 	//        	/evaluations_limit_
 	        	//System.out.println("evals:" + evals);
 	            // Select parents        	
@@ -858,5 +878,5 @@ public class player25 implements ContestSubmission
 	        System.out.println("Best fitness found: "+optimum_eval);
 	        //System.out.println(evals);
 		}
-	}
+	//}
 }
