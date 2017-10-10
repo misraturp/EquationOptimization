@@ -36,7 +36,7 @@ public class player25 implements ContestSubmission
 		player25 player = new player25();
 		player.setSeed(1);
 		player.setEvaluation(eval);
-		//player.run();
+		player.run();
 			
 		SchaffersEvaluation eval_sch = new SchaffersEvaluation();
 		
@@ -50,7 +50,7 @@ public class player25 implements ContestSubmission
 		player25 player_kat = new player25();
 		player_kat.setSeed(1);
 		player_kat.setEvaluation(eval_kat);
-		player_kat.run();
+		//player_kat.run();
 		
 		System.out.println("Done!");
 			
@@ -87,15 +87,19 @@ public class player25 implements ContestSubmission
         	if(hasStructure) {
         		//schaffers
         		schaffers = true;
+        		//schaffersOptimization();
+        		
         	}
         	else {
         		//katsuura
         		katsuura = true;
+        		//katsuuraOptimization();
         	}
         }else{
             // Do sth else
         	//bent cigar
         	bentCig = true;
+        	//bentCigarOptimization();
         }
     }
 	
@@ -593,6 +597,100 @@ public class player25 implements ContestSubmission
 		return children;
 	}
 	
+	public int getClosestGuy(int in, individual [] all_the_guys){
+		
+		int dim = all_the_guys[0].dim;
+		double min_distance=10.0;
+		int index = 0;
+		individual the_guy = all_the_guys[in];
+		
+		min_distance = 10.0;
+		double distance=0.0;
+		//look at all the other guys
+		for(int j=0;j<all_the_guys.length;j++) {
+
+			distance = 0.0;
+			double sum = 0.0;
+			
+			//calculate distance
+			for(int x=0;x<dim;x++) {
+				if(in!=j) {
+					double difference = the_guy.content[x] - all_the_guys[j].content[x];
+					sum += difference;
+				}
+			}
+			distance = sum/10;
+			if(distance<min_distance) {
+				min_distance = distance;
+				index = j;
+			}
+			/////////////////////////
+		}
+		//all_the_guys[j]
+		return index;
+	}
+	
+	public individual[] close_cross_over(individual[] parents){
+		
+		Random rand = new Random();
+
+		int size = parents.length;
+		int dim = parents[0].dim;
+		individual[] children = new individual [size];
+		for(int x=0;x<children.length;x++){
+			children[x] = new individual();
+		}
+
+		List<Integer> used = new ArrayList<Integer>();
+		int num1 = 0;
+		int num2 = 0;
+		int count = 0;
+		int child_index = 0;
+		
+		individual parent1 = new individual();
+		individual parent2 = new individual();
+		
+		//randomly assign parents together
+		while(used.size()<size) {
+			
+			//select the first parent
+			while(count == 0) {
+				num1 = rand.nextInt(size); 
+				if(!used.contains(num1)) {
+					parent1 = parents[num1];
+					count++;
+				}
+			}
+			count = 0;
+			used.add(num1);
+			
+			//select the second parent
+			while(count == 0) {
+				num2 = rand.nextInt(size);
+				if(!used.contains(num2)){
+					parent2 = parents[num2];
+					count++;
+				}
+			}
+			count = 0;
+			used.add(num2);
+			
+			for(int j=0; j<dim; j++) {
+				if(Math.random()<0.5) {
+					children[child_index].content[j] = parent1.content[j];
+					children[child_index+1].content[j] = parent2.content[j];
+				}
+				else {
+					children[child_index].content[j] = parent2.content[j];
+					children[child_index+1].content[j] = parent1.content[j];
+				}
+			}
+			child_index = child_index + 2;
+		}
+		
+		
+		return children;
+	}
 	//END CROSS-OVER ALGORITHMS//
 	
 	//DONE
@@ -694,9 +792,20 @@ public class player25 implements ContestSubmission
 		Random rand = new Random();
 		double gaussian = 0.0;
 		double real_scale = 0.5;
-		double eval_fitness = getAvgFitness(original_population);
-		if(eval_fitness>2) {
-			real_scale = 1/(10*Math.log(eval_fitness));
+		if(schaffers) {
+			real_scale = 0.5;
+			double eval_fitness = getAvgFitness(original_population);
+			if(eval_fitness>2) {
+				real_scale = 1/(10*Math.log(eval_fitness));
+			}
+		}
+		else 
+		{
+			real_scale = 0.5;
+			double eval_fitness = getAvgFitness(original_population);
+			if(eval_fitness>2) {
+				real_scale = 1/(100*Math.log(eval_fitness));
+			}
 		}
 		
 		for(int i=0;i<children.length;i++) {
@@ -940,7 +1049,7 @@ public class player25 implements ContestSubmission
 	        int optimum_eval=0;
 	        
 	        //Remember to always give an even number
-	        int parent_number = 2;
+	        int parent_number = 50;
 	        
 	        // init population
 	        initialization(size, dimension);
@@ -950,19 +1059,20 @@ public class player25 implements ContestSubmission
 	        // calculate fitness
 	        while(evals<evaluations_limit_){
 	//        	/evaluations_limit_
-	        	//System.out.println("evals:" + evals);
+	        	System.out.println("evals:" + evals);
 	            // Select parents        	
 	        	//double [][] parents = selection(population, parent_number);
 	        	//individual[] parents = rankBasedSelection(parent_number);
 	        	individual[] parents = tournamentSelection(parent_number, 50, 0.3);
 	        	//System.out.println("parents chosen");
-	        	
+
 	            // Apply crossover / mutation operators
 	        	individual[] children = uniform_cross_over(parents);
 	        	//System.out.println("children created");
-	        	children = gaussian_mutation(children, 0.01);
+	        	//children = gaussian_mutation(children, 0.01);
+	        	children = adaptive_mutation(children);
 	        		     
-	            
+
 	            individual[] population_wChildren = Arrays.copyOf(original_population, size+children.length);
 	            
 	            for(int k=size;k<size+children.length;k++) {
@@ -1071,7 +1181,7 @@ public class player25 implements ContestSubmission
 		//for(int trial=0;trial<iterations;trial++) {
 			
 	        evals = 0;
-	        int size = 100;
+	        int size = 50;
 	        int dimension = 10;
 	        double max_fitness = 0;
 	        double best_fitness = 0;
@@ -1147,7 +1257,6 @@ public class player25 implements ContestSubmission
 	    //}
 	}
 	
-
 	public double katsuuraOptimization()
 	{
 		// Run your algorithm here
@@ -1155,7 +1264,7 @@ public class player25 implements ContestSubmission
 		//for(int trial=0;trial<iterations;trial++) {
 			
 	        evals = 0;
-	        int size = 50;
+	        int size = 1000;
 	        int dimension = 10;
 	        double max_fitness = 0;
 	        double best_fitness = 0;
@@ -1164,7 +1273,7 @@ public class player25 implements ContestSubmission
 	        int optimum_eval=0;
 	        
 	        //Remember to always give an even number
-	        int parent_number = 2;
+	        int parent_number = 1000;
 	        
 	        // init population
 	        initialization(size, dimension);
@@ -1177,8 +1286,8 @@ public class player25 implements ContestSubmission
 	        	//System.out.println("evals:" + evals);
 	            // Select parents        	
 	        	//double [][] parents = selection(population, parent_number);
-	        	//individual[] parents = rankBasedSelection(parent_number);
-	        	individual[] parents = tournamentSelection(parent_number, 50, 0.3);
+	        	individual[] parents = rankBasedSelection(parent_number);
+	        	//individual[] parents = tournamentSelection(parent_number, 50, 0.3);
 	        	//System.out.println("parents chosen");
 	        	
 	            // Apply crossover / mutation operators
@@ -1186,18 +1295,19 @@ public class player25 implements ContestSubmission
 	        	//System.out.println("children created");
 	        	//children = gaussian_mutation(children);
 	        	children = adaptive_mutation(children);
+	        	crowding(parents, children);
 	        		     
-	            
+	            /*
 	            individual[] population_wChildren = Arrays.copyOf(original_population, size+children.length);
 	            
 	            for(int k=size;k<size+children.length;k++) {
 	            	
 	            	population_wChildren[k] = children[k-size];
-	            }
+	            }*/
 	
 	
 	    		//genitor selection
-	            original_population = selection(population_wChildren, size);
+	            //original_population = selection(population_wChildren, size);
 	            //original_population = elitism(population_wChildren, 5);
 	            //original_population = round_robin(population_wChildren, 3, 5);
 	        	//System.out.println("new population created");
@@ -1207,7 +1317,7 @@ public class player25 implements ContestSubmission
 	            if(max_fitness<best_fitness) {
 	            	max_fitness = best_fitness;
 	            	optimum_eval=evals;
-	            	//System.out.println(optimum_eval);
+	            	System.out.println(optimum_eval);
 	            }
 	
 	        	//System.out.print(".");
