@@ -16,6 +16,9 @@ public class player25 implements ContestSubmission
     public int evals;
     public individual[] original_population;
     public int trial = 0;
+    boolean bentCig = false;
+    boolean schaffers = false;
+    boolean katsuura = false;
     //public double[] fitness_array;
     //public double[] fitness_temp;
 	
@@ -33,15 +36,21 @@ public class player25 implements ContestSubmission
 		player25 player = new player25();
 		player.setSeed(1);
 		player.setEvaluation(eval);
-		player.run();
-		
+		//player.run();
 			
-		//SchaffersEvaluation eval_sch = new SchaffersEvaluation();
+		SchaffersEvaluation eval_sch = new SchaffersEvaluation();
 		
-		//player25 player_sch = new player25();
-		//player_sch.setSeed(1);
-		//player_sch.setEvaluation(eval_sch);
-		//player_sch.run();
+		player25 player_sch = new player25();
+		player_sch.setSeed(1);
+		player_sch.setEvaluation(eval_sch);
+		player_sch.run();
+		
+		KatsuuraEvaluation eval_kat = new KatsuuraEvaluation();
+		
+		player25 player_kat = new player25();
+		player_kat.setSeed(1);
+		player_kat.setEvaluation(eval_kat);
+		player_kat.run();
 		
 		System.out.println("Done!");
 			
@@ -75,14 +84,18 @@ public class player25 implements ContestSubmission
 		// Do sth with property values, e.g. specify relevant settings of your algorithm
         if(isMultimodal){
             // Do sth
-        	if(isSeparable) {
-
+        	if(hasStructure) {
+        		//schaffers
+        		schaffers = true;
         	}
         	else {
-        		
+        		//katsuura
+        		katsuura = true;
         	}
         }else{
             // Do sth else
+        	//bent cigar
+        	bentCig = true;
         }
     }
 	
@@ -337,12 +350,23 @@ public class player25 implements ContestSubmission
 		return parents;
 	}
 	
-	public double[][] stochasticUniversalSampling(double [][] population){
+	public individual[] stochasticUniversalSampling(int parent_num){
 
-		int size = population.length;
-		int dim = population[0].length;
+		int size = original_population.length;
+		int dim = original_population[0].dim;
+
+		individual[] sorted_population = fitnessSort(original_population);
+		individual[] parents = new individual[parent_num];
 		
-		double [][] parents = new double[size][dim];
+		int interval = (int) Math.floor(size/parent_num);
+		int count = 0;
+		int index = interval;
+		
+		while(count<parent_num){
+			parents[count] = sorted_population[index-1];
+			index = index + interval;
+			count++;
+		}
 		
 		return parents;
 	}
@@ -443,8 +467,11 @@ public class player25 implements ContestSubmission
 	
 	//CROSS-OVER ALGORITHMS//
 	
+	//FIX THIS TO INCLUDE MORE POINTS
 	public individual[] cross_over(individual[] parents, int point_num)
 	{
+		Random rand = new Random();
+		int size = parents.length;
 		int dim =  parents[0].dim;
 		individual[] children = new individual[parents.length];
 		for(int x=0;x<children.length;x++){
@@ -452,17 +479,53 @@ public class player25 implements ContestSubmission
 		}
 		
 		int cross_point = dim/2;
+		List<Integer> used = new ArrayList<Integer>();
+		int num1 = 0;
+		int num2 = 0;
+		int count = 0;
+		int child_index = 0;
 		
-		for(int i=0; i<dim; i++) {
-			if(i<cross_point) {
-				children[0].content[i] = parents[0].content[i];
-				children[1].content[i] = parents[1].content[i];
+		individual parent1 = new individual();
+		individual parent2 = new individual();
+		
+		//randomly assign parents together
+		while(used.size()<size) {
+			
+			//select the first parent
+			while(count == 0) {
+				num1 = rand.nextInt(size); 
+				if(!used.contains(num1)) {
+					parent1 = parents[num1];
+					count++;
+				}
 			}
-			else {
-				children[0].content[i] = parents[1].content[i];
-				children[1].content[i] = parents[0].content[i];	
+			count = 0;
+			used.add(num1);
+			
+			//select the second parent
+			while(count == 0) {
+				num2 = rand.nextInt(size);
+				if(!used.contains(num2)){
+					parent2 = parents[num2];
+					count++;
+				}
 			}
+			count = 0;
+			used.add(num2);
+			
+			for(int i=0; i<dim; i++) {
+				if(i<cross_point) {
+					children[child_index].content[i] = parent1.content[i];
+					children[child_index+1].content[i] = parent2.content[i];
+				}
+				else {
+					children[child_index].content[i] = parent2.content[i];
+					children[child_index+1].content[i] = parent1.content[i];	
+				}
+			}
+			child_index = child_index + 2;
 		}
+
 		
 		return children;
 	}
@@ -606,10 +669,66 @@ public class player25 implements ContestSubmission
 		
 		return children;
 	}
+		
+	public double getMaxFitness(individual[] array) {
+		double max = 0.0;
+		for(int i=0;i<array.length;i++) {
+			double cur = array[i].fitness_value;
+			if(cur>max) {
+				max = cur;
+			}
+		}
+		return max;
+	}
 	
-
+	public double getAvgFitness(individual[] array) {
+		double sum = 0.0;
+		for(int i=0;i<array.length;i++) {
+			sum = sum+array[i].fitness_value;
+		}
+		return sum/array.length;
+	}
 	
-	public individual[] gaussian_mutation(individual[] children){
+	public individual[] adaptive_mutation(individual[] children){
+		
+		Random rand = new Random();
+		double gaussian = 0.0;
+		double real_scale = 0.5;
+		double eval_fitness = getAvgFitness(original_population);
+		if(eval_fitness>2) {
+			real_scale = 1/(10*Math.log(eval_fitness));
+		}
+		
+		for(int i=0;i<children.length;i++) {
+			
+			for(int j=0;j<children[0].dim;j++) {
+				
+				gaussian = rand.nextGaussian()*real_scale; 
+				
+				if(children[i].content[j]+gaussian>5)
+				{
+					children[i].content[j] = 5;
+				}
+				else if(children[i].content[j]+gaussian<-5)
+				{
+					children[i].content[j] = -5;					
+				}
+				else {
+					children[i].content[j] = children[i].content[j]+gaussian; 
+				}
+			}
+		}
+		
+		for(int a=0; a<children.length;a++) {
+			children[a].fitness_value = (double) evaluation_.evaluate(children[a].content);
+			children[a].comp_fit=children[a].fitness_value;
+			evals++;
+		}
+		
+		return children;
+	}
+	
+	public individual[] gaussian_mutation(individual[] children, double scale){
 		
 		Random rand = new Random();
 		double gaussian = 0.0;
@@ -618,7 +737,7 @@ public class player25 implements ContestSubmission
 			
 			for(int j=0;j<children[0].dim;j++) {
 				
-				gaussian = rand.nextGaussian()*0.01; 
+				gaussian = rand.nextGaussian()*scale; 
 				
 				if(children[i].content[j]+gaussian>5)
 				{
@@ -805,7 +924,7 @@ public class player25 implements ContestSubmission
 		return hele;
 	}
 	
-	public void run()
+	public double bentCigarOptimization()
 	{
 		// Run your algorithm here
 		//int iterations = evaluations_limit_/10000;
@@ -841,7 +960,7 @@ public class player25 implements ContestSubmission
 	            // Apply crossover / mutation operators
 	        	individual[] children = uniform_cross_over(parents);
 	        	//System.out.println("children created");
-	        	children = gaussian_mutation(children);
+	        	children = gaussian_mutation(children, 0.01);
 	        		     
 	            
 	            individual[] population_wChildren = Arrays.copyOf(original_population, size+children.length);
@@ -872,11 +991,257 @@ public class player25 implements ContestSubmission
 	            	//log fitness values with stats****///
 	        }
 	        
-	        System.out.println("Trial no."+trial);
+	        System.out.println("Bent Cigar Function, trial."+trial);
 	        //trial++;
 	        System.out.println("Best fitness: " + max_fitness);  
 	        System.out.println("Best fitness found: "+optimum_eval);
 	        //System.out.println(evals);
+	        
+	        return best_fitness;
+
+	    //}
+	}
+	
+	public int indexOf(individual[] array, individual object) {
+		for(int i=0;i<array.length;i++) {
+			if(array[i]==object) {
+				return i;
+			}
 		}
-	//}
+		return -1;
+	}
+
+	public void crowding(individual[] parents, individual[] children){
+		
+		int size = parents.length;
+		int dim = parents[0].dim;
+		List<Integer> used = new ArrayList<Integer>();
+		boolean found = false;
+		individual[] survivors = new individual[size];
+		int count = 0;
+		
+		while(count<size) {
+			for(int i=0; i<parents.length;i++) {
+				
+				double distance = 10;
+				int index = 0;
+				
+				//iterate every children
+				for(int j=0; j<children.length;j++) {
+					
+					double sum = 0.0;
+					
+					//calculate the distance
+					for(int x=0;x<dim;x++) {
+						double difference = Math.abs(parents[i].content[x]-children[j].content[x]);
+						sum = sum + difference;
+					}
+					
+					double cur_dis = sum/dim;
+					
+					//if this distance is smaller than the previously smallest
+					//and this child is not used yet
+					if(cur_dis<distance && !used.contains(j)) {
+						distance = cur_dis;
+						index = j;
+					}
+				}
+	
+				if(parents[i].fitness_value<children[index].fitness_value) {
+					int original_place = indexOf(original_population, parents[i]);
+					original_population[original_place] = children[index];
+					survivors[count] =  children[index];
+					used.add(index);
+					count++;
+				}
+				else {
+					survivors[count] =  parents[i];
+					//used.add(index);
+					count++;
+				}
+			}
+		}
+		//return survivors;
+	}
+	
+	public double schaffersOptimization()
+	{
+		// Run your algorithm here
+		//int iterations = evaluations_limit_/10000;
+		//for(int trial=0;trial<iterations;trial++) {
+			
+	        evals = 0;
+	        int size = 100;
+	        int dimension = 10;
+	        double max_fitness = 0;
+	        double best_fitness = 0;
+	        double[] fitness_array = new double[size];
+	        original_population = new individual[size];
+	        int optimum_eval=0;
+	        
+	        //Remember to always give an even number
+	        int parent_number = 50;
+	        
+	        // init population
+	        initialization(size, dimension);
+			//calculateFitness();
+	
+	    	//System.out.println("Starting...");
+	        // calculate fitness
+	        while(evals<evaluations_limit_){
+	//        	/evaluations_limit_
+	        	//System.out.println("evals:" + evals);
+	            // Select parents        	
+	        	
+	        	//double [][] parents = selection(population, parent_number);
+	        	//individual[] parents = rankBasedSelection(parent_number);
+	        	individual[] parents = stochasticUniversalSampling(parent_number);
+	        	
+	        	//individual[] parents = tournamentSelection(parent_number, 50, 0.3);
+	        	//individual[] parents = original_population;
+	        	//System.out.println("parents chosen");
+	        	
+	            // Apply crossover / mutation operators
+	        	individual[] children = cross_over(parents,1);
+	        	//System.out.println("children created");
+	        	children = adaptive_mutation(children);
+	        	//DON'T FORGET TO REMOVE PARENTS IN THE NEXT STEP THEN!!
+	        	crowding(parents, children);
+	            
+	            /*individual[] population_wChildren = Arrays.copyOf(original_population, size+children.length);
+	            
+	            for(int k=size;k<size+children.length;k++) {
+	            	
+	            	population_wChildren[k] = children[k-size];
+	            }*/
+	
+	    		//genitor selection
+	            //original_population = selection(population_wChildren, size);
+	            //original_population = generational_selection(population_wChildren);
+	            //original_population = elitism(population_wChildren, 5);
+	            //original_population = round_robin(population_wChildren, 3, 5);
+	        	//System.out.println("new population created");
+	
+	            fitness_array = populateFitnessArray();
+	            best_fitness = getMaxValue(fitness_array);
+	            if(max_fitness<best_fitness) {
+	            	max_fitness = best_fitness;
+	            	optimum_eval=evals;
+	            	//System.out.println(optimum_eval);
+	            }
+	
+	        	//System.out.print(".");
+	        	
+	            // Select survivors
+	            	//log fitness values with stats****///
+	        }
+	        
+	        System.out.println("Schaffers function, trial."+trial);
+	        //trial++;
+	        System.out.println("Best fitness: " + max_fitness);  
+	        System.out.println("Best fitness found: " + optimum_eval);
+	        //System.out.println(evals);
+	        
+	        return best_fitness;
+
+	    //}
+	}
+	
+
+	public double katsuuraOptimization()
+	{
+		// Run your algorithm here
+		//int iterations = evaluations_limit_/10000;
+		//for(int trial=0;trial<iterations;trial++) {
+			
+	        evals = 0;
+	        int size = 50;
+	        int dimension = 10;
+	        double max_fitness = 0;
+	        double best_fitness = 0;
+	        double[] fitness_array = new double[size];
+	        original_population = new individual[size];
+	        int optimum_eval=0;
+	        
+	        //Remember to always give an even number
+	        int parent_number = 2;
+	        
+	        // init population
+	        initialization(size, dimension);
+			//calculateFitness();
+	
+	    	//System.out.println("Starting...");
+	        // calculate fitness
+	        while(evals<evaluations_limit_){
+	//        	/evaluations_limit_
+	        	//System.out.println("evals:" + evals);
+	            // Select parents        	
+	        	//double [][] parents = selection(population, parent_number);
+	        	//individual[] parents = rankBasedSelection(parent_number);
+	        	individual[] parents = tournamentSelection(parent_number, 50, 0.3);
+	        	//System.out.println("parents chosen");
+	        	
+	            // Apply crossover / mutation operators
+	        	individual[] children = uniform_cross_over(parents);
+	        	//System.out.println("children created");
+	        	//children = gaussian_mutation(children);
+	        	children = adaptive_mutation(children);
+	        		     
+	            
+	            individual[] population_wChildren = Arrays.copyOf(original_population, size+children.length);
+	            
+	            for(int k=size;k<size+children.length;k++) {
+	            	
+	            	population_wChildren[k] = children[k-size];
+	            }
+	
+	
+	    		//genitor selection
+	            original_population = selection(population_wChildren, size);
+	            //original_population = elitism(population_wChildren, 5);
+	            //original_population = round_robin(population_wChildren, 3, 5);
+	        	//System.out.println("new population created");
+	
+	            fitness_array = populateFitnessArray();
+	            best_fitness = getMaxValue(fitness_array);
+	            if(max_fitness<best_fitness) {
+	            	max_fitness = best_fitness;
+	            	optimum_eval=evals;
+	            	//System.out.println(optimum_eval);
+	            }
+	
+	        	//System.out.print(".");
+	        	
+	            // Select survivors
+	            	//log fitness values with stats****///
+	        }
+	        
+	        System.out.println("Katsuura function, trial."+trial);
+	        //trial++;
+	        System.out.println("Best fitness: " + max_fitness);  
+	        System.out.println("Best fitness found: "+optimum_eval);
+	        //System.out.println(evals);
+	        
+	        return best_fitness;
+
+	    //}
+	}
+	
+	
+	public void run()
+	{
+		double best_bent;
+		double best_sch;
+		double best_kat;
+		
+		if(bentCig) {
+			best_bent = bentCigarOptimization();
+		}
+		else if(schaffers) {
+			best_sch = schaffersOptimization();
+		}
+		else if(katsuura) {
+			best_kat = katsuuraOptimization();
+		}
+	}
 }
