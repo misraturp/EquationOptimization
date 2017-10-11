@@ -1059,7 +1059,7 @@ public class player25 implements ContestSubmission
 	        // calculate fitness
 	        while(evals<evaluations_limit_){
 	//        	/evaluations_limit_
-	        	System.out.println("evals:" + evals);
+	        	//System.out.println("evals:" + evals);
 	            // Select parents        	
 	        	//double [][] parents = selection(population, parent_number);
 	        	//individual[] parents = rankBasedSelection(parent_number);
