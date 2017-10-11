@@ -801,7 +801,7 @@ public class player25 implements ContestSubmission
 		}
 		else 
 		{
-			real_scale = 0.5;
+			real_scale = 0.4;
 			double eval_fitness = getAvgFitness(original_population);
 			if(eval_fitness>2) {
 				real_scale = 1/(100*Math.log(eval_fitness));
