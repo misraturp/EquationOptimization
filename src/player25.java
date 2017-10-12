@@ -31,28 +31,28 @@ public class player25 implements ContestSubmission
 		
 		//ContestEvaluation con = System.getProperty("evaluation");
 		
-		BentCigarFunction eval = new BentCigarFunction();
+		//BentCigarFunction eval = new BentCigarFunction();
 
-		player25 player = new player25();
-		player.setSeed(1);
-		player.setEvaluation(eval);
-		player.run();
+		//player25 player = new player25();
+		//player.setSeed(1);
+		//player.setEvaluation(eval);
+		//player.run();
 			
-		SchaffersEvaluation eval_sch = new SchaffersEvaluation();
+		//SchaffersEvaluation eval_sch = new SchaffersEvaluation();
 		
-		player25 player_sch = new player25();
-		player_sch.setSeed(1);
-		player_sch.setEvaluation(eval_sch);
-		player_sch.run();
+		//player25 player_sch = new player25();
+		//player_sch.setSeed(1);
+		//player_sch.setEvaluation(eval_sch);
+		//player_sch.run();
 		
-		KatsuuraEvaluation eval_kat = new KatsuuraEvaluation();
+		//KatsuuraEvaluation eval_kat = new KatsuuraEvaluation();
 		
-		player25 player_kat = new player25();
-		player_kat.setSeed(1);
-		player_kat.setEvaluation(eval_kat);
+		//player25 player_kat = new player25();
+		//player_kat.setSeed(1);
+		//player_kat.setEvaluation(eval_kat);
 		//player_kat.run();
 		
-		System.out.println("Done!");
+		//System.out.println("Done!");
 			
 	}
 	
@@ -431,7 +431,7 @@ public class player25 implements ContestSubmission
 		/*List<Integer> used = new ArrayList<Integer>();
 		int t=0;
 
-		//system.outprintln("probs assigned, starting parent selection...");
+		//System.out.println("probs assigned, starting parent selection...");
 		//for each new parent
 		while(t<parent_num) {
 			
@@ -449,7 +449,7 @@ public class player25 implements ContestSubmission
 				if(generated<c) {
 					
 					if(!used.contains(p)) {
-						//system.outprintln("parent selected");
+						//System.out.println("parent selected");
 						parents[t] = sorted_population[p];	
 						used.add(p);
 						t++;
@@ -1033,7 +1033,7 @@ public class player25 implements ContestSubmission
 		return hele;
 	}
 	
-	public double bentCigarOptimization()
+	public void bentCigarOptimization()
 	{
 		// Run your algorithm here
 		//int iterations = evaluations_limit_/10000;
@@ -1101,13 +1101,13 @@ public class player25 implements ContestSubmission
 	            	//log fitness values with stats****///
 	        }
 	        
-	        System.out.println("Bent Cigar Function, trial."+trial);
+	        //System.out.println("Bent Cigar Function, trial."+trial);
 	        //trial++;
-	        System.out.println("Best fitness: " + max_fitness);  
-	        System.out.println("Best fitness found: "+optimum_eval);
+	        //System.out.println("Best fitness: " + max_fitness);  
+	        //System.out.println("Best fitness found: "+optimum_eval);
 	        //System.out.println(evals);
 	        
-	        return best_fitness;
+	        //return best_fitness;
 
 	    //}
 	}
@@ -1174,7 +1174,7 @@ public class player25 implements ContestSubmission
 		//return survivors;
 	}
 	
-	public double schaffersOptimization()
+	public void schaffersOptimization()
 	{
 		// Run your algorithm here
 		//int iterations = evaluations_limit_/10000;
@@ -1246,25 +1246,25 @@ public class player25 implements ContestSubmission
 	            	//log fitness values with stats****///
 	        }
 	        
-	        System.out.println("Schaffers function, trial."+trial);
+	        //System.out.println("Schaffers function, trial."+trial);
 	        //trial++;
-	        System.out.println("Best fitness: " + max_fitness);  
-	        System.out.println("Best fitness found: " + optimum_eval);
+	        //System.out.println("Best fitness: " + max_fitness);  
+	        //System.out.println("Best fitness found: " + optimum_eval);
 	        //System.out.println(evals);
 	        
-	        return best_fitness;
+	        //return best_fitness;
 
 	    //}
 	}
 	
-	public double katsuuraOptimization()
+	public void katsuuraOptimization()
 	{
 		// Run your algorithm here
 		//int iterations = evaluations_limit_/10000;
 		//for(int trial=0;trial<iterations;trial++) {
 			
 	        evals = 0;
-	        int size = 1000;
+	        int size = 100;
 	        int dimension = 10;
 	        double max_fitness = 0;
 	        double best_fitness = 0;
@@ -1273,7 +1273,7 @@ public class player25 implements ContestSubmission
 	        int optimum_eval=0;
 	        
 	        //Remember to always give an even number
-	        int parent_number = 1000;
+	        int parent_number = 100;
 	        
 	        // init population
 	        initialization(size, dimension);
@@ -1317,7 +1317,7 @@ public class player25 implements ContestSubmission
 	            if(max_fitness<best_fitness) {
 	            	max_fitness = best_fitness;
 	            	optimum_eval=evals;
-	            	System.out.println(optimum_eval);
+	            	//System.out.println(optimum_eval);
 	            }
 	
 	        	//System.out.print(".");
@@ -1326,32 +1326,28 @@ public class player25 implements ContestSubmission
 	            	//log fitness values with stats****///
 	        }
 	        
-	        System.out.println("Katsuura function, trial."+trial);
+	        //System.out.println("Katsuura function, trial."+trial);
 	        //trial++;
-	        System.out.println("Best fitness: " + max_fitness);  
-	        System.out.println("Best fitness found: "+optimum_eval);
+	        //System.out.println("Best fitness: " + max_fitness);  
+	        //System.out.println("Best fitness found: "+optimum_eval);
 	        //System.out.println(evals);
 	        
-	        return best_fitness;
+	        //return best_fitness;
 
 	    //}
 	}
 	
 	
 	public void run()
-	{
-		double best_bent;
-		double best_sch;
-		double best_kat;
-		
+	{		
 		if(bentCig) {
-			best_bent = bentCigarOptimization();
+			bentCigarOptimization();
 		}
 		else if(schaffers) {
-			best_sch = schaffersOptimization();
+			schaffersOptimization();
 		}
 		else if(katsuura) {
-			best_kat = katsuuraOptimization();
+			katsuuraOptimization();
 		}
 	}
 }
