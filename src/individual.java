@@ -7,6 +7,7 @@ public class individual {
 	int dim = 10;
 	double probability;
 	int wins=0;
+	boolean used = false;
 
 	public individual() {
 		super();
