@@ -1449,7 +1449,7 @@ public class player25 implements ContestSubmission
 	        // calculate fitness
 	        while(evals<evaluations_limit_){
 	//        	/evaluations_limit_
-	        	System.out.println("evals:" + evals);
+	        	//System.out.println("evals:" + evals);
 	            // Select parents        	
 	        	//double [][] parents = selection(population, parent_number);
 	        	//individual[] parents = rankBasedSelection(parent_number);
@@ -1460,8 +1460,8 @@ public class player25 implements ContestSubmission
 	        	//individual[] children = uniform_cross_over(parents);
 	        	individual[] children = close_cross_over();
 	        	//System.out.println("children created");
-	        	//children = gaussian_mutation(children);
-	        	children = adaptive_mutation(children);
+	        	children = gaussian_mutation(children,0.01);
+	        	//children = adaptive_mutation(children);
 	        		     
 	            
 	            individual[] population_wChildren = Arrays.copyOf(original_population, size+children.length);
@@ -1491,7 +1491,8 @@ public class player25 implements ContestSubmission
 	            if(max_fitness<best_fitness) {
 	            	max_fitness = best_fitness;
 	            	optimum_eval=evals;
-	            	//System.out.println(optimum_eval);
+	            	System.out.println(max_fitness);
+	            	System.out.println(optimum_eval);
 	            }
 	
 	        	//System.out.print(".");

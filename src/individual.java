@@ -17,7 +17,8 @@ public class individual {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public individual(double[] content, double fitness_value) {
+	public individual(double[] content, double fitness_value) 
+	{
 		super();
 		this.content = content;
 		this.fitness_value = fitness_value;
