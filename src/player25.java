@@ -719,7 +719,8 @@ public class player25 implements ContestSubmission
 			
 			//calculate distance
 			if(in!=j) {
-				for(int x=0;x<dim;x++) {
+				for(int x=0;x<dim;x++) 
+				{
 						double difference = Math.abs(the_guy.content[x] - all_the_guys[j].content[x]);
 						sum += difference;
 					}
