@@ -894,6 +894,7 @@ public class player25 implements ContestSubmission
 		return sum/array.length;
 	}
 	
+	
 	public individual[] adaptive_mutation(individual[] children){
 		
 		Random rand = new Random();
@@ -906,12 +907,20 @@ public class player25 implements ContestSubmission
 				real_scale = 1/(10*Math.log(eval_fitness));
 			}
 		}
-		else 
+		else if(bentCig)
 		{
 			real_scale = 0.5;
 			double eval_fitness = getAvgFitness(original_population);
 			if(eval_fitness>2) {
 				real_scale = 1/(100*Math.log(eval_fitness));
+			}
+		}
+		else
+		{
+			real_scale = 0.01;
+			double eval_fitness = getAvgFitness(original_population);
+			if(eval_fitness>3) {
+				real_scale = 1/(10*Math.log(eval_fitness));
 			}
 		}
 		
@@ -943,6 +952,7 @@ public class player25 implements ContestSubmission
 		
 		return children;
 	}
+	
 	
 	public individual[] gaussian_mutation(individual[] children, double scale){
 		
@@ -981,6 +991,40 @@ public class player25 implements ContestSubmission
 	//END MUTATION ALGORITHMS
 	
 	//SURVIVOR SELECTION ALGORITHMS//
+	
+	public individual[] fitness_sharing(individual[] pop_wChildren, double range) {
+		
+		int size = pop_wChildren.length;
+		int dim = pop_wChildren[0].dim;
+		double distance = 0.0;
+		
+		for(int i=0;i<size;i++) 
+		{
+			for(int j=0;j<size;j++) 
+			{
+				double sum = 0.0;
+				for(int x=0;x<dim;x++) {
+					double difference = Math.abs(pop_wChildren[i].content[x] - pop_wChildren[j].content[x]);
+					sum += difference;
+				}
+				distance = sum/10;
+				if(distance<range) {
+					pop_wChildren[i].distances.add(distance);
+				}
+			}
+			double denom = 1;
+			List<Double> dis_list =  pop_wChildren[i].distances;
+			
+			for(int t=0;t<dis_list.size();t++) 
+			{
+				denom = 1-dis_list.get(t)/range;
+				//System.out.println(denom);
+			}
+			
+			pop_wChildren[i].fitness_value = pop_wChildren[i].comp_fit/denom;
+		}
+		return pop_wChildren;
+	}
 	
 	//DONE
 	public individual[] generational_selection(individual[] pop_wChildren){
@@ -1140,6 +1184,7 @@ public class player25 implements ContestSubmission
 		}
 		return hele;
 	}
+	
 	
 	public void bentCigarOptimization()
 	{
@@ -1372,7 +1417,7 @@ public class player25 implements ContestSubmission
 		//for(int trial=0;trial<iterations;trial++) {
 			
 	        evals = 0;
-	        int size = 10000;
+	        int size = 100;
 	        int dimension = 10;
 	        double max_fitness = 0;
 	        double best_fitness = 0;
@@ -1385,6 +1430,8 @@ public class player25 implements ContestSubmission
 	        
 	        // init population
 	        initialization(size, dimension);
+	        //individual[] meh = fitnessSort(original_population);
+	        //System.out.println(meh[0]);
 			//calculateFitness();
 	
 	    	//System.out.println("Starting...");
@@ -1403,8 +1450,8 @@ public class player25 implements ContestSubmission
 	        	individual[] children = close_cross_over();
 	        	//System.out.println("children created");
 	        	//children = gaussian_mutation(children);
-	        	children = gaussian_mutation(children, 0.01);
-	        	//crowding(parents, children);
+	        	children = adaptive_mutation(children);
+	        	//crowding(original_population, children);
 	        		     
 	            
 	            individual[] population_wChildren = Arrays.copyOf(original_population, size+children.length);
@@ -1414,7 +1461,7 @@ public class player25 implements ContestSubmission
 	            	population_wChildren[k] = children[k-size];
 	            }
 	
-	
+	            population_wChildren = fitness_sharing(population_wChildren,1);
 	    		//genitor selection
 	            //original_population = selection(population_wChildren, size);
 	            original_population = elitism(population_wChildren, 5);
@@ -1438,13 +1485,14 @@ public class player25 implements ContestSubmission
 	        System.out.println("Katsuura function, trial."+trial);
 	        trial++;
 	        System.out.println("Best fitness: " + max_fitness);  
-	        System.out.println("Best fitness found: "+optimum_eval);
+	        System.out.println("Best fitness found: "+ optimum_eval);
 	        //System.out.println(evals);
 	        
 	        //return best_fitness;
 
 	    //}
 	}
+	
 	
 	
 	public void run()
