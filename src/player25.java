@@ -1190,7 +1190,7 @@ public class player25 implements ContestSubmission
 		double[] hele = new double[original_population.length];
 		
 		for(int i=0; i<hele.length;i++) {
-			hele[i] = original_population[i].comp_fit;
+			hele[i] = original_population[i].fitness_value;
 		}
 		return hele;
 	}
@@ -1461,7 +1461,6 @@ public class player25 implements ContestSubmission
 	        	//System.out.println("children created");
 	        	//children = gaussian_mutation(children);
 	        	children = adaptive_mutation(children);
-	        	//crowding(original_population, children);
 	        		     
 	            
 	            individual[] population_wChildren = Arrays.copyOf(original_population, size+children.length);
@@ -1472,9 +1471,17 @@ public class player25 implements ContestSubmission
 	            }
 	
 	            population_wChildren = fitness_sharing(population_wChildren,1);
+	            
+	            for(int f=0;f<size;f++) 
+	            {
+	            	children[f] = population_wChildren[size+f];
+	            }
+	            
+
+	        	crowding(original_population, children);
 	    		//genitor selection
 	            //original_population = selection(population_wChildren, size);
-	            original_population = elitism(population_wChildren, 5);
+	            //original_population = elitism(population_wChildren, 5);
 	            //original_population = round_robin(population_wChildren, 3, 5);
 	        	//System.out.println("new population created");
 	
