@@ -6,7 +6,6 @@ public class individual {
 	double [] content = new double[10];
 	double fitness_value;
 	double comp_fit;
-	double shared_fitness;
 	int dim = 10;
 	double probability;
 	int wins=0;
@@ -23,7 +22,6 @@ public class individual {
 		this.content = content;
 		this.fitness_value = fitness_value;
 		this.comp_fit = fitness_value;
-		this.shared_fitness = fitness_value;
 	}
 
 }

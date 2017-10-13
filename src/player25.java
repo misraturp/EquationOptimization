@@ -1004,8 +1004,10 @@ public class player25 implements ContestSubmission
 			{
 				double sum = 0.0;
 				for(int x=0;x<dim;x++) {
-					double difference = Math.abs(pop_wChildren[i].content[x] - pop_wChildren[j].content[x]);
-					sum += difference;
+					double a = pop_wChildren[i].content[x];
+					double b = pop_wChildren[j].content[x];
+					double difference = Math.abs(a - b);
+					sum = sum + difference;
 				}
 				distance = sum/10;
 				if(distance<range) {
@@ -1021,7 +1023,15 @@ public class player25 implements ContestSubmission
 				//System.out.println(denom);
 			}
 			
-			pop_wChildren[i].fitness_value = pop_wChildren[i].comp_fit/denom;
+			pop_wChildren[i].comp_fit = pop_wChildren[i].fitness_value/denom;
+			
+			if(Double.isInfinite(pop_wChildren[i].comp_fit)) {
+				pop_wChildren[i].comp_fit = 0.0;
+				System.out.println("Found it");
+			}
+			
+			pop_wChildren[i].distances = new ArrayList<Double>();
+			
 		}
 		return pop_wChildren;
 	}
@@ -1180,7 +1190,7 @@ public class player25 implements ContestSubmission
 		double[] hele = new double[original_population.length];
 		
 		for(int i=0; i<hele.length;i++) {
-			hele[i] = original_population[i].fitness_value;
+			hele[i] = original_population[i].comp_fit;
 		}
 		return hele;
 	}
