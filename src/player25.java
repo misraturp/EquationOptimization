@@ -918,10 +918,27 @@ public class player25 implements ContestSubmission
 		}
 		else
 		{
-			real_scale = 0.01;
-			double eval_fitness = getAvgFitness(original_population);
-			if(eval_fitness>3) {
-				real_scale = 1/(10*Math.log(eval_fitness));
+			real_scale = 0.005;
+			double eval_fitness = getMaxFitness(original_population);
+			if(eval_fitness>2) {
+				//real_scale = 1/(10*Math.log(eval_fitness));
+				real_scale = 0.003;
+			}
+			else if(eval_fitness>4) {
+				//real_scale = 1/(10*Math.log(eval_fitness));
+				real_scale = 0.001;
+			}
+			else if(eval_fitness>6) {
+				//real_scale = 1/(10*Math.log(eval_fitness));
+				real_scale = 0.0005;
+			}
+			else if(eval_fitness>7) {
+				//real_scale = 1/(10*Math.log(eval_fitness));
+				real_scale = 0.0003;
+			}
+			else if(eval_fitness>7.5) {
+				//real_scale = 1/(10*Math.log(eval_fitness));
+				real_scale = 0.0001;
 			}
 		}
 		
@@ -1460,8 +1477,8 @@ public class player25 implements ContestSubmission
 	        	//individual[] children = uniform_cross_over(parents);
 	        	individual[] children = close_cross_over();
 	        	//System.out.println("children created");
-	        	children = gaussian_mutation(children,0.01);
-	        	//children = adaptive_mutation(children);
+	        	//children = gaussian_mutation(children,0.005);
+	        	children = adaptive_mutation(children);
 	        		     
 	            
 	            individual[] population_wChildren = Arrays.copyOf(original_population, size+children.length);
@@ -1479,10 +1496,11 @@ public class player25 implements ContestSubmission
 	            }
 	            
 
-	        	crowding(original_population, children);
+	        	//crowding(original_population, children);
+	           // original_population = genitor_selection(population_wChildren);
 	    		//genitor selection
 	            //original_population = selection(population_wChildren, size);
-	            //original_population = elitism(population_wChildren, 5);
+	            original_population = elitism(population_wChildren, 75);
 	            //original_population = round_robin(population_wChildren, 3, 5);
 	        	//System.out.println("new population created");
 	
