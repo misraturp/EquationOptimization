@@ -19,6 +19,10 @@ public class player25 implements ContestSubmission
     boolean bentCig = false;
     boolean schaffers = false;
     boolean katsuura = false;
+	List<individual[]> islands = new ArrayList<individual[]>();
+
+    double max_fitness = 0;
+    double best_fitness = 0;
     //public double[] fitness_array;
     //public double[] fitness_temp;
 	
@@ -293,19 +297,20 @@ public class player25 implements ContestSubmission
 		int ind = 0;
 		int count = 0;
 		List<Integer> used_1 = new ArrayList<Integer>();
-		
+
 		//determine the tournament attenders
 		while(count<tournament_num) {
 			
 			ind = rand.nextInt(size);
-			
+
 			if(!used_1.contains(ind) && !original_population[ind].used) {
 				tributes[count] = original_population[ind];
 				used_1.add(ind);
 				count++;
 			}
+
 		}
-		
+
 		//get the fitness of selected individuals
 		//double [] fitness_array = getFitnessArray(tributes);
 		
@@ -668,11 +673,18 @@ public class player25 implements ContestSubmission
 		individual parent1 = new individual();
 		individual parent2 = new individual();
 		
+		individual[] parents = new individual[2];
+
 		//randomly assign parents together
 		while(child_index<size-2) {
 
-			individual[] parents = tournamentSelection(2, 3, 0.3);
-			
+			if(bentCig) {
+				parents = tournamentSelection(2, 3, 0.3);
+			}
+			else {
+				parents = rankBasedSelection(2);
+			}
+
 			parent1 = parents[0];
 			num1 = indexOf(original_population,parent1);
 			original_population[num1].used = true;
@@ -923,7 +935,7 @@ public class player25 implements ContestSubmission
 			if(eval_fitness>2) {
 				//real_scale = 1/(10*Math.log(eval_fitness));
 				real_scale = 0.003;
-			}
+			}/*
 			else if(eval_fitness>4) {
 				//real_scale = 1/(10*Math.log(eval_fitness));
 				real_scale = 0.001;
@@ -931,15 +943,15 @@ public class player25 implements ContestSubmission
 			else if(eval_fitness>6) {
 				//real_scale = 1/(10*Math.log(eval_fitness));
 				real_scale = 0.0005;
-			}
+			}*/
 			else if(eval_fitness>7) {
 				//real_scale = 1/(10*Math.log(eval_fitness));
-				real_scale = 0.0003;
-			}
+				real_scale = 0.0005;
+			}/*
 			else if(eval_fitness>7.5) {
 				//real_scale = 1/(10*Math.log(eval_fitness));
 				real_scale = 0.0001;
-			}
+			}*/
 		}
 		
 		for(int i=0;i<children.length;i++) {
@@ -963,6 +975,7 @@ public class player25 implements ContestSubmission
 		}
 		
 		for(int a=0; a<children.length;a++) {
+			//System.out.println(evals);
 			children[a].fitness_value = (double) evaluation_.evaluate(children[a].content);
 			children[a].comp_fit=children[a].fitness_value;
 			evals++;
@@ -1282,11 +1295,11 @@ public class player25 implements ContestSubmission
 	            	//log fitness values with stats****///
 	        }
 	        
-	        //System.out.println("Bent Cigar Function, trial."+trial);
+	        System.out.println("Bent Cigar Function, trial."+trial);
 	        //trial++;
-	        System.out.println("Best fitness: " + max_fitness);  
-	        System.out.println("Best fitness found: "+optimum_eval);
-	        //System.out.println(evals);
+	       System.out.println("Best fitness: " + max_fitness);  
+	       System.out.println("Best fitness found: "+optimum_eval);
+	       //System.out.println(evals);
 	        
 	        //return best_fitness;
 
@@ -1427,10 +1440,10 @@ public class player25 implements ContestSubmission
 	            	//log fitness values with stats****///
 	        }
 	        
-	        //System.out.println("Schaffers function, trial."+trial);
+	        System.out.println("Schaffers function, trial."+trial);
 	        //trial++;
-	        System.out.println("Best fitness: " + max_fitness);  
-	        System.out.println("Best fitness found: " + optimum_eval);
+	       System.out.println("Best fitness: " + max_fitness);  
+	       System.out.println("Best fitness found: " + optimum_eval);
 	        //System.out.println(evals);
 	        
 	        //return best_fitness;
@@ -1519,10 +1532,10 @@ public class player25 implements ContestSubmission
 	            	//log fitness values with stats****///
 	        }
 	        
-	        System.out.println("Katsuura function, trial."+trial);
+	       //System.out.println("Katsuura function, trial."+trial);
 	        trial++;
-	        System.out.println("Best fitness: " + max_fitness);  
-	        System.out.println("Best fitness found: "+ optimum_eval);
+	       //System.out.println("Best fitness: " + max_fitness);  
+	       //System.out.println("Best fitness found: "+ optimum_eval);
 	        //System.out.println(evals);
 	        
 	        //return best_fitness;
@@ -1530,6 +1543,249 @@ public class player25 implements ContestSubmission
 	    //}
 	}
 	
+	public void growIslands() {
+		
+        int size = 100;
+        int dimension = 10;
+        double max_fitness = 0;
+        double best_fitness = 0;
+        double[] fitness_array = new double[size];
+        original_population = new individual[size];
+        int optimum_eval=0;
+        
+        //Remember to always give an even number
+        int parent_number = 5000;
+        
+        // init population
+        initialization(size, dimension);
+        //individual[] meh = fitnessSort(original_population);
+        //System.out.println(meh[0]);
+		//calculateFitness();
+
+    	//System.out.println("Starting...");
+        // calculate fitness
+        
+        int epoch = 10;
+        
+        for(int counter=0; counter<epoch; counter++){
+        	
+//        	/evaluations_limit_
+        	//System.out.println("evals:" + evals);
+            // Select parents        	
+        	//double [][] parents = selection(population, parent_number);
+        	//individual[] parents = rankBasedSelection(parent_number);
+        	//individual[] parents = tournamentSelection(parent_number, 50, 0.3);
+        	//System.out.println("parents chosen");
+        	
+            // Apply crossover / mutation operators
+        	//individual[] children = uniform_cross_over(parents);
+        	individual[] children = close_cross_over();
+        	//System.out.println("children created");
+        	//children = gaussian_mutation(children,0.005);
+        	children = adaptive_mutation(children);
+        		     
+            
+            individual[] population_wChildren = Arrays.copyOf(original_population, size+children.length);
+            
+            for(int k=size;k<size+children.length;k++) {
+            	
+            	population_wChildren[k] = children[k-size];
+            }
+
+            population_wChildren = fitness_sharing(population_wChildren,1);
+            
+            for(int f=0;f<size;f++) 
+            {
+            	children[f] = population_wChildren[size+f];
+            }
+            
+
+        	//crowding(original_population, children);
+           // original_population = genitor_selection(population_wChildren);
+    		//genitor selection
+            //original_population = selection(population_wChildren, size);
+            original_population = elitism(population_wChildren, 75);
+            //original_population = round_robin(population_wChildren, 3, 5);
+        	//System.out.println("new population created");
+
+            fitness_array = populateFitnessArray();
+            best_fitness = getMaxValue(fitness_array);
+            if(max_fitness<best_fitness) {
+            	max_fitness = best_fitness;
+            	optimum_eval=evals;
+            	//System.out.println(max_fitness);
+            	//System.out.println(optimum_eval);
+            }
+
+        	//System.out.print(".");
+        	
+            // Select survivors
+            	//log fitness values with stats****///
+        }
+        
+       //System.out.println("Katsuura function, trial."+trial);
+        trial++;
+       //System.out.println("Best fitness: " + max_fitness);  
+       //System.out.println("Best fitness found: "+ optimum_eval);
+        //System.out.println(evals);
+        
+        //return best_fitness;
+        
+        islands.add(original_population);
+    //}
+		
+	}
+	
+    public void evolveIslands(int index) {
+		
+        //evals = 0;
+        int size = 100;
+        int dimension = 10;
+        double[] fitness_array = new double[size];
+        original_population = new individual[size];
+        int optimum_eval=0;
+        
+        //Remember to always give an even number
+        int parent_number = 5000;
+        
+        // init population
+        original_population = islands.get(index);
+        islands.remove(index);
+        //individual[] meh = fitnessSort(original_population);
+        //System.out.println(meh[0]);
+		//calculateFitness();
+
+    	//System.out.println("Starting...");
+        // calculate fitness
+        
+        int epoch = 10;
+        
+        for(int counter=0; counter<epoch; counter++){
+        	
+//        	/evaluations_limit_
+        	//System.out.println("evals:" + evals);
+            // Select parents        	
+        	//double [][] parents = selection(population, parent_number);
+        	//individual[] parents = rankBasedSelection(parent_number);
+        	//individual[] parents = tournamentSelection(parent_number, 50, 0.3);
+        	//System.out.println("parents chosen");
+        	
+            // Apply crossover / mutation operators
+        	//individual[] children = uniform_cross_over(parents);
+        	individual[] children = close_cross_over();
+        	//individual[]children = fixed_uniform_cross_over();
+        	//System.out.println("children created");
+        	//children = gaussian_mutation(children,0.005);
+        	children = adaptive_mutation(children);
+        		     
+            
+            individual[] population_wChildren = Arrays.copyOf(original_population, size+children.length);
+            
+            for(int k=size;k<size+children.length;k++) {
+            	
+            	population_wChildren[k] = children[k-size];
+            }
+
+            population_wChildren = fitness_sharing(population_wChildren,1);
+            
+            for(int f=0;f<size;f++) 
+            {
+            	children[f] = population_wChildren[size+f];
+            }
+            
+
+        	//crowding(original_population, children);
+           // original_population = genitor_selection(population_wChildren);
+    		//genitor selection
+            //original_population = selection(population_wChildren, size);
+            original_population = elitism(population_wChildren, 75);
+            //original_population = round_robin(population_wChildren, 3, 5);
+        	//System.out.println("new population created");
+
+            fitness_array = populateFitnessArray();
+            best_fitness = getMaxValue(fitness_array);
+            if(max_fitness<best_fitness) {
+            	max_fitness = best_fitness;
+            	optimum_eval=evals;
+            	//System.out.println(max_fitness);
+            	//System.out.println(optimum_eval);
+            }
+
+        	//System.out.print(".");
+        	
+            // Select survivors
+            	//log fitness values with stats****///
+        }
+        
+       //System.out.println("Katsuura function, trial."+trial);
+        trial++;
+       //System.out.println("Best fitness: " + max_fitness);  
+       //System.out.println("Best fitness found: "+ optimum_eval);
+        //System.out.println(evals);
+        
+        //return best_fitness;
+        
+        islands.add(original_population);
+    //}
+		
+	}
+	
+	public void katsuuraOptimization_islands()
+	{
+		// Run your algorithm here
+		//int iterations = evaluations_limit_/10000;
+		//for(int trial=0;trial<iterations;trial++) {
+			
+		int islands_num = 5;
+        evals = 0;
+		
+		for(int island_count=0; island_count<islands_num; island_count++) {
+			growIslands();
+		}
+		
+		while(evals<evaluations_limit_-100*5*10) {
+			//System.out.println(evals);
+		
+			//swap best ones
+			List<individual[]> bestests = new ArrayList<individual[]>();
+			int best_num = -1;
+			
+			//this list includes the best n guys of the different island
+			for(int la_isla_bonita=0; la_isla_bonita<islands.size();la_isla_bonita++){
+				individual[] best = fitnessSort(islands.get(la_isla_bonita));
+				double ratio = 0.1;
+				best_num = (int) ((int) best.length*ratio);
+				best = selection(best, best_num);
+				bestests.add(best);
+			}
+			
+			for(int eye_of_the_tiger=0; eye_of_the_tiger<islands.size();eye_of_the_tiger++){
+				
+				if(eye_of_the_tiger==islands.size()-1){
+					for(int fight=0;fight<best_num;fight++) {
+						islands.get(0)[fight] = bestests.get(eye_of_the_tiger)[fight];
+					}
+				}
+				else {
+					for(int fight=0;fight<best_num;fight++) {
+						islands.get(eye_of_the_tiger+1)[fight] = bestests.get(eye_of_the_tiger)[fight];
+					}
+				}
+			}
+
+			//islands = new ArrayList<individual[]>();
+			for(int island_count=0; island_count<islands_num; island_count++) {
+				evolveIslands(island_count);
+			}
+			//System.out.println(evals);
+		}
+		
+		for(int hele=0;hele<islands.size();hele++) {
+			individual[] falan = selection(islands.get(hele),1);
+			System.out.println(falan[0].fitness_value);
+		}
+		
+	}
 	
 	
 	public void run()
@@ -1541,7 +1797,7 @@ public class player25 implements ContestSubmission
 			schaffersOptimization();
 		}
 		else if(katsuura) {
-			katsuuraOptimization();
+			katsuuraOptimization_islands();
 		}
 	}
 }
