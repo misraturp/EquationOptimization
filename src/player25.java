@@ -2,6 +2,15 @@ import org.vu.contest.ContestSubmission;
 import org.vu.contest.ContestEvaluation;
 
 import java.util.Random;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,33 +40,66 @@ public class player25 implements ContestSubmission
 		rnd_ = new Random();
 	}
 	
-	public static void main(String[] args){
+	public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException{
 		
 		//ContestEvaluation con = System.getProperty("evaluation");
 		
-		BentCigarFunction eval = new BentCigarFunction();
+		PrintWriter writer1 = new PrintWriter("experiments_bent.txt", "UTF-8");	
+		int loop1=3;
+		
+		for(int i=0;i<loop1;i++) {
+		
+			BentCigarFunction eval = new BentCigarFunction();
+	
+			player25 player = new player25();
+			player.setSeed(1);
+			player.setEvaluation(eval);
+			String[] results1 = player.run(0);
 
-		player25 player = new player25();
-		player.setSeed(1);
-		player.setEvaluation(eval);
-		player.run();
+			writer1.println(results1[0]);
+			writer1.println(results1[1]);
+		}
+
+		writer1.close();
+		
+		int loop2=3;
+
+		PrintWriter writer2 = new PrintWriter("experiments_sch.txt", "UTF-8");	
+		
+		for(int i=0;i<loop2;i++) {
+			SchaffersEvaluation eval_sch = new SchaffersEvaluation();
 			
-		SchaffersEvaluation eval_sch = new SchaffersEvaluation();
+			player25 player_sch = new player25();
+			player_sch.setSeed(1);
+			player_sch.setEvaluation(eval_sch);
+			String[] results2 = player_sch.run(0);
+
+			writer2.println(results2[0]);
+			writer2.println(results2[1]);
 		
-		player25 player_sch = new player25();
-		player_sch.setSeed(1);
-		player_sch.setEvaluation(eval_sch);
-		player_sch.run();
+		}
+
+		writer2.close();
+
+		PrintWriter writer3 = new PrintWriter("experiments_kat.txt", "UTF-8");	
+		int loop3=3;
 		
-		KatsuuraEvaluation eval_kat = new KatsuuraEvaluation();
+		for(int i=0;i<loop3;i++) {
 		
-		player25 player_kat = new player25();
-		player_kat.setSeed(1);
-		player_kat.setEvaluation(eval_kat);
-		player_kat.run();
+			KatsuuraEvaluation eval_kat = new KatsuuraEvaluation();
+			
+			player25 player_kat = new player25();
+			player_kat.setSeed(1);
+			player_kat.setEvaluation(eval_kat);
+			String[] results3 = player_kat.run(0);
 		
+			writer3.println(results3[0]);
+			writer3.println(results3[1]);
+		
+		}
 		//System.out.println("Done!");
-			
+		
+		writer3.close();
 	}
 	
 	public void setSeed(long seed)
@@ -879,11 +921,11 @@ public class player25 implements ContestSubmission
 			}
 		}
 
-		for(int a=0; a<children.length;a++) {
+		/*for(int a=0; a<children.length;a++) {
 			children[a].fitness_value = (double) evaluation_.evaluate(children[a].content);
 			children[a].comp_fit=children[a].fitness_value;
 			evals++;
-		}
+		*/
 		
 		return children;
 	}
@@ -974,12 +1016,6 @@ public class player25 implements ContestSubmission
 			}
 		}
 		
-		for(int a=0; a<children.length;a++) {
-			//System.out.println(evals);
-			children[a].fitness_value = (double) evaluation_.evaluate(children[a].content);
-			children[a].comp_fit=children[a].fitness_value;
-			evals++;
-		}
 		
 		return children;
 	}
@@ -1010,11 +1046,11 @@ public class player25 implements ContestSubmission
 			}
 		}
 		
-		for(int a=0; a<children.length;a++) {
+		/*for(int a=0; a<children.length;a++) {
 			children[a].fitness_value = (double) evaluation_.evaluate(children[a].content);
 			children[a].comp_fit=children[a].fitness_value;
 			evals++;
-		}
+		}*/
 		
 		return children;
 	}
@@ -1227,7 +1263,7 @@ public class player25 implements ContestSubmission
 	}
 	
 	
-	public void bentCigarOptimization()
+	public String[] bentCigarOptimization()
 	{
 		// Run your algorithm here
 		//int iterations = evaluations_limit_/10000;
@@ -1266,7 +1302,13 @@ public class player25 implements ContestSubmission
 	        	//children = gaussian_mutation(children, 0.01);
 	        	children = adaptive_mutation(children);
 	        		     
-
+	    		for(int a=0; a<children.length;a++) {
+	    			//System.out.println(evals);
+	    			children[a].fitness_value = (double) evaluation_.evaluate(children[a].content);
+	    			children[a].comp_fit=children[a].fitness_value;
+	    			evals++;
+	    		}
+	        	
 	            individual[] population_wChildren = Arrays.copyOf(original_population, size+children.length);
 	            
 	            for(int k=size;k<size+children.length;k++) {
@@ -1297,13 +1339,17 @@ public class player25 implements ContestSubmission
 	        
 	        System.out.println("Bent Cigar Function, trial."+trial);
 	        //trial++;
-	       System.out.println("Best fitness: " + max_fitness);  
+	       System.out.println("Best fitness: " + max_fitness); 
 	       System.out.println("Best fitness found: "+optimum_eval);
+	       String [] returning = new String[] {Double.toString(max_fitness), Double.toString(optimum_eval)};
+
 	       //System.out.println(evals);
 	        
 	        //return best_fitness;
 
 	    //}
+	       
+	       return returning;
 	}
 	
 	public int indexOf(individual[] array, individual object) {
@@ -1368,7 +1414,7 @@ public class player25 implements ContestSubmission
 		//return survivors;
 	}
 	
-	public void schaffersOptimization()
+	public String[] schaffersOptimization()
 	{
 		// Run your algorithm here
 		//int iterations = evaluations_limit_/10000;
@@ -1409,6 +1455,14 @@ public class player25 implements ContestSubmission
 	        	individual[] children = fixed_cross_over(1);
 	        	//System.out.println("children created");
 	        	children = adaptive_mutation(children);
+	        	
+	    		for(int a=0; a<children.length;a++) {
+	    			//System.out.println(evals);
+	    			children[a].fitness_value = (double) evaluation_.evaluate(children[a].content);
+	    			children[a].comp_fit=children[a].fitness_value;
+	    			evals++;
+	    		}
+	    		
 	        	//DON'T FORGET TO REMOVE PARENTS IN THE NEXT STEP THEN!!
 	        	crowding(original_population, children);
 	            
@@ -1444,14 +1498,16 @@ public class player25 implements ContestSubmission
 	        //trial++;
 	       System.out.println("Best fitness: " + max_fitness);  
 	       System.out.println("Best fitness found: " + optimum_eval);
+	       String [] returning = new String[] {Double.toString(max_fitness), Double.toString(optimum_eval)};
+
 	        //System.out.println(evals);
 	        
-	        //return best_fitness;
+	       return returning;
 
 	    //}
 	}
 	
-	public void katsuuraOptimization()
+	public String[] katsuuraOptimization()
 	{
 		// Run your algorithm here
 		//int iterations = evaluations_limit_/10000;
@@ -1493,6 +1549,12 @@ public class player25 implements ContestSubmission
 	        	//children = gaussian_mutation(children,0.005);
 	        	children = adaptive_mutation(children);
 	        		     
+	    		for(int a=0; a<children.length;a++) {
+	    			//System.out.println(evals);
+	    			children[a].fitness_value = (double) evaluation_.evaluate(children[a].content);
+	    			children[a].comp_fit=children[a].fitness_value;
+	    			evals++;
+	    		}
 	            
 	            individual[] population_wChildren = Arrays.copyOf(original_population, size+children.length);
 	            
@@ -1537,8 +1599,10 @@ public class player25 implements ContestSubmission
 	       //System.out.println("Best fitness: " + max_fitness);  
 	       //System.out.println("Best fitness found: "+ optimum_eval);
 	        //System.out.println(evals);
+	        String [] returning = new String[] {Double.toString(max_fitness), Double.toString(optimum_eval)};
+
 	        
-	        //return best_fitness;
+	        return returning;
 
 	    //}
 	}
@@ -1583,6 +1647,13 @@ public class player25 implements ContestSubmission
         	//System.out.println("children created");
         	//children = gaussian_mutation(children,0.005);
         	children = adaptive_mutation(children);
+        	
+    		for(int a=0; a<children.length;a++) {
+    			//System.out.println(evals);
+    			children[a].fitness_value = (double) evaluation_.evaluate(children[a].content);
+    			children[a].comp_fit=children[a].fitness_value;
+    			evals++;
+    		}
         		     
             
             individual[] population_wChildren = Arrays.copyOf(original_population, size+children.length);
@@ -1636,7 +1707,7 @@ public class player25 implements ContestSubmission
 		
 	}
 	
-    public void evolveIslands(int index) {
+    public String[] evolveIslands(int index) {
 		
         //evals = 0;
         int size = 100;
@@ -1678,6 +1749,12 @@ public class player25 implements ContestSubmission
         	//children = gaussian_mutation(children,0.005);
         	children = adaptive_mutation(children);
         		     
+    		for(int a=0; a<children.length;a++) {
+    			//System.out.println(evals);
+    			children[a].fitness_value = (double) evaluation_.evaluate(children[a].content);
+    			children[a].comp_fit=children[a].fitness_value;
+    			evals++;
+    		}
             
             individual[] population_wChildren = Arrays.copyOf(original_population, size+children.length);
             
@@ -1722,19 +1799,24 @@ public class player25 implements ContestSubmission
        //System.out.println("Best fitness: " + max_fitness);  
        //System.out.println("Best fitness found: "+ optimum_eval);
         //System.out.println(evals);
+        String [] returning = new String[] {Double.toString(max_fitness), Double.toString(optimum_eval)};
+
         
-        //return best_fitness;
         
         islands.add(original_population);
     //}
+        return returning;
 		
 	}
 	
-	public void katsuuraOptimization_islands()
+	public String[] katsuuraOptimization_islands()
 	{
 		// Run your algorithm here
 		//int iterations = evaluations_limit_/10000;
 		//for(int trial=0;trial<iterations;trial++) {
+
+		String[] final_results = new String[2];
+		double best_fit = 0.0;
 			
 		int islands_num = 5;
         evals = 0;
@@ -1775,29 +1857,47 @@ public class player25 implements ContestSubmission
 
 			//islands = new ArrayList<individual[]>();
 			for(int island_count=0; island_count<islands_num; island_count++) {
-				evolveIslands(island_count);
+				String[] results = evolveIslands(island_count);
+				if(best_fit<Double.parseDouble(results[0])) {
+					best_fit = Double.parseDouble(results[0]);
+					final_results = results;
+				}
 			}
 			//System.out.println(evals);
 		}
+		
 		
 		for(int hele=0;hele<islands.size();hele++) {
 			individual[] falan = selection(islands.get(hele),1);
 			System.out.println(falan[0].fitness_value);
 		}
 		
+		return final_results;
+		
 	}
 	
 	
-	public void run()
+	public String[] run(int i)
 	{		
+		String[] results=null;
+			
 		if(bentCig) {
-			bentCigarOptimization();
+			results = bentCigarOptimization();
 		}
 		else if(schaffers) {
-			schaffersOptimization();
+			results = schaffersOptimization();
 		}
 		else if(katsuura) {
-			katsuuraOptimization_islands();
+			results = katsuuraOptimization_islands();
 		}
+		
+		return results;
 	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
