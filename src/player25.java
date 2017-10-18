@@ -475,39 +475,6 @@ public class player25 implements ContestSubmission
 		
 		parents = selectBasedOnProbability(sorted_population, parent_num, total);
 		
-		/*List<Integer> used = new ArrayList<Integer>();
-		int t=0;
-
-		//System.out.println("probs assigned, starting parent selection...");
-		//for each new parent
-		while(t<parent_num) {
-			
-			//generate random number from 0 to total(sum of all probs)
-			double generated = total * rand.nextDouble();
-			
-			double c = 0;
-			
-			//iterates over whole population until finds to which individual the
-			//generated number refers
-			for(int p=0; p<size;p++){
-				
-				c = c + sorted_population[p].probability;
-				
-				if(generated<c) {
-					
-					if(!used.contains(p)) {
-						//System.out.println("parent selected");
-						parents[t] = sorted_population[p];	
-						used.add(p);
-						t++;
-						break;
-					}
-					else {
-						break;
-					}
-				}
-			}
-		}*/
 		
 		return parents;
 	}
@@ -607,11 +574,11 @@ public class player25 implements ContestSubmission
 			
 			parent1 = parents[0];
 			num1 = indexOf(original_population,parent1);
-			original_population[num1].used = true;
+			//original_population[num1].used = true;
 					
 			parent2 = parents[1];
 			num2 = indexOf(original_population,parent2);
-			original_population[num2].used = true;
+			//original_population[num2].used = true;
 			
 			for(int i=0; i<dim; i++) {
 				if(i<cross_point) {
@@ -729,11 +696,11 @@ public class player25 implements ContestSubmission
 
 			parent1 = parents[0];
 			num1 = indexOf(original_population,parent1);
-			original_population[num1].used = true;
+			//original_population[num1].used = true;
 					
 			parent2 = parents[1];
 			num2 = indexOf(original_population,parent2);
-			original_population[num2].used = true;
+			//original_population[num2].used = true;
 			
 			for(int j=0; j<dim; j++) {
 				if(Math.random()<0.5) {
@@ -875,6 +842,13 @@ public class player25 implements ContestSubmission
 		
 		List<Integer> used = new ArrayList<Integer>();
 		int t=0;
+
+		List<individual> un_used = new ArrayList<individual>();
+		for(int k=0;k<size;k++) {
+			if(!indvs[k].used) {
+				un_used.add(indvs[k]);
+			}
+		}
 
 		//for each new parent
 		while(t<selection_num) {
@@ -1318,6 +1292,7 @@ public class player25 implements ContestSubmission
 	
 	
 	    		//genitor selection
+	            //crowding(original_population, children);
 	            original_population = selection(population_wChildren, size);
 	            //original_population = elitism(population_wChildren, 5);
 	            //original_population = round_robin(population_wChildren, 3, 5);
@@ -1455,6 +1430,7 @@ public class player25 implements ContestSubmission
 	        	individual[] children = fixed_cross_over(1);
 	        	//System.out.println("children created");
 	        	children = adaptive_mutation(children);
+	        	//children = gaussian_mutation(children, 1);
 	        	
 	    		for(int a=0; a<children.length;a++) {
 	    			//System.out.println(evals);
@@ -1543,7 +1519,10 @@ public class player25 implements ContestSubmission
 	        	//System.out.println("parents chosen");
 	        	
 	            // Apply crossover / mutation operators
-	        	//individual[] children = uniform_cross_over(parents);
+	        	
+	        	//individual[] children = fixed_uniform_cross_over();
+	        	//individual[] children = fixed_cross_over(1);
+	        	
 	        	individual[] children = close_cross_over();
 	        	//System.out.println("children created");
 	        	//children = gaussian_mutation(children,0.005);
