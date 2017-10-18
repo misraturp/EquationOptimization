@@ -918,7 +918,7 @@ public class player25 implements ContestSubmission
 		}
 		else
 		{
-			real_scale = 0.005;
+			real_scale = 0.01;
 			double eval_fitness = getMaxFitness(original_population);
 			if(eval_fitness>2) {
 				//real_scale = 1/(10*Math.log(eval_fitness));
@@ -930,15 +930,15 @@ public class player25 implements ContestSubmission
 			}
 			else if(eval_fitness>6) {
 				//real_scale = 1/(10*Math.log(eval_fitness));
-				real_scale = 0.0005;
+				real_scale = 0.0007;
 			}
 			else if(eval_fitness>7) {
 				//real_scale = 1/(10*Math.log(eval_fitness));
-				real_scale = 0.0003;
+				real_scale = 0.0005;
 			}
 			else if(eval_fitness>7.5) {
 				//real_scale = 1/(10*Math.log(eval_fitness));
-				real_scale = 0.0001;
+				real_scale = 0.0002;
 			}
 		}
 		
@@ -1284,8 +1284,8 @@ public class player25 implements ContestSubmission
 	        
 	        //System.out.println("Bent Cigar Function, trial."+trial);
 	        //trial++;
-	        System.out.println("Best fitness: " + max_fitness);  
-	        System.out.println("Best fitness found: "+optimum_eval);
+	       //System.out.println("Best fitness: " + max_fitness);  
+	       //System.out.println("Best fitness found: "+optimum_eval);
 	        //System.out.println(evals);
 	        
 	        //return best_fitness;
@@ -1429,8 +1429,8 @@ public class player25 implements ContestSubmission
 	        
 	        //System.out.println("Schaffers function, trial."+trial);
 	        //trial++;
-	        System.out.println("Best fitness: " + max_fitness);  
-	        System.out.println("Best fitness found: " + optimum_eval);
+	       //System.out.println("Best fitness: " + max_fitness);  
+	       //System.out.println("Best fitness found: " + optimum_eval);
 	        //System.out.println(evals);
 	        
 	        //return best_fitness;
@@ -1445,7 +1445,7 @@ public class player25 implements ContestSubmission
 		//for(int trial=0;trial<iterations;trial++) {
 			
 	        evals = 0;
-	        int size = 100;
+	        int size = 1000;
 	        int dimension = 10;
 	        double max_fitness = 0;
 	        double best_fitness = 0;
@@ -1500,7 +1500,9 @@ public class player25 implements ContestSubmission
 	           // original_population = genitor_selection(population_wChildren);
 	    		//genitor selection
 	            //original_population = selection(population_wChildren, size);
-	            original_population = elitism(population_wChildren, 75);
+	            original_population = elitism(population_wChildren, 750);
+	            //original_population = generational_selection(population_wChildren);
+	            
 	            //original_population = round_robin(population_wChildren, 3, 5);
 	        	//System.out.println("new population created");
 	
@@ -1509,8 +1511,8 @@ public class player25 implements ContestSubmission
 	            if(max_fitness<best_fitness) {
 	            	max_fitness = best_fitness;
 	            	optimum_eval=evals;
-	            	System.out.println(max_fitness);
-	            	System.out.println(optimum_eval);
+	            	//System.out.println(max_fitness);
+	            	//System.out.println(optimum_eval);
 	            }
 	
 	        	//System.out.print(".");
@@ -1519,10 +1521,10 @@ public class player25 implements ContestSubmission
 	            	//log fitness values with stats****///
 	        }
 	        
-	        System.out.println("Katsuura function, trial."+trial);
+	       //System.out.println("Katsuura function, trial."+trial);
 	        trial++;
-	        System.out.println("Best fitness: " + max_fitness);  
-	        System.out.println("Best fitness found: "+ optimum_eval);
+	       //System.out.println("Best fitness: " + max_fitness);  
+	       //System.out.println("Best fitness found: "+ optimum_eval);
 	        //System.out.println(evals);
 	        
 	        //return best_fitness;
